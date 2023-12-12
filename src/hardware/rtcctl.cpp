@@ -326,8 +326,11 @@ bool rtcctl_powermgm_event_cb( EventBits_t event, void *arg ) {
                                         #else
                                             #if defined( M5PAPER )
                                             #elif defined( M5CORE2 )
-                                            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+                                            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
                                                 gpio_wakeup_enable( (gpio_num_t)RTC_INT_PIN, GPIO_INTR_LOW_LEVEL );
+                                                esp_sleep_enable_gpio_wakeup ();
+                                            #elif defined( LILYGO_WATCH_2020_S3 )
+                                                gpio_wakeup_enable( (gpio_num_t)BOARD_RTC_INT_PIN, GPIO_INTR_LOW_LEVEL );
                                                 esp_sleep_enable_gpio_wakeup ();
                                             #elif defined( LILYGO_WATCH_2021 ) && defined( VERSION_2 )
                                                 // gpio_wakeup_enable( (gpio_num_t)RTC_Int, GPIO_INTR_POSEDGE );
