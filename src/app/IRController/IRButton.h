@@ -7,7 +7,7 @@
 #ifdef NATIVE_64BIT
 #else
     #ifdef M5PAPER
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         #include <IRremoteESP8266.h>
         #define RAW_CODE_BUFFER_SIZE sizeof(uint16_t)*120
 

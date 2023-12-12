@@ -23,6 +23,7 @@
 #ifndef _CONFIG_H
 
     #include "lvgl.h"
+    
 
     #ifdef NATIVE_64BIT
             #define RES_X_MAX       LV_HOR_RES_MAX
@@ -48,6 +49,14 @@
         #elif defined( LILYGO_WATCH_2020_V3 )
             #undef LILYGO_WATCH_LVGL
             #define HARDWARE_NAME   "T-Watch2020V3"
+            #define RES_X_MAX       240
+            #define RES_Y_MAX       240
+            #define USE_PSRAM_ALLOC_LVGL                    /** @brief enabled LVGL to use PSRAM */ 
+            #define ENABLE_WEBSERVER                        /** @brief To disable built-in webserver, comment this line */
+            #define ENABLE_FTPSERVER                        /** @brief To disable built-in ftpserver, comment this line */
+        #elif defined( LILYGO_WATCH_2020_S3 )
+            #undef LILYGO_WATCH_LVGL
+            #define HARDWARE_NAME   "T-Watch2020S3"
             #define RES_X_MAX       240
             #define RES_Y_MAX       240
             #define USE_PSRAM_ALLOC_LVGL                    /** @brief enabled LVGL to use PSRAM */ 
@@ -100,11 +109,15 @@
         #ifdef NATIVE_64BIT
         #else
             #ifdef M5PAPER
-            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) 
                 #include <LilyGoWatch.h>
+            #elif defined( LILYGO_WATCH_2020_S3 )
+                #include <../include/twatch2020s3/Setup212_LilyGo_T_Watch_S3.h>
+                #include <../lib/twatch2020s3/utilities.h>
+                #include <LilyGoLib.h>
+                extern LilyGoLib watch;
             #endif
         #endif
         #define _CONFIG_H 
     #endif
-
 #endif // _CONFIG_H
