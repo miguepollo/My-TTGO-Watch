@@ -5,7 +5,7 @@
 #else
     #if defined( M5PAPER ) || defined( M5CORE2 ) || defined( LILYGO_WATCH_2021 ) 
 
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         #include <IRremoteESP8266.h>
         IRConfig::IRConfig() : BaseJsonConfig("ir-remote.json") {
             buttonCount = 0;
