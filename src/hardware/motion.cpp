@@ -258,12 +258,19 @@ bool bma_powermgm_event_cb( EventBits_t event, void *arg ) {
         #ifdef NATIVE_64BIT
         #else
             #ifdef M5PAPER
-            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) 
                 case POWERMGM_ENABLE_INTERRUPTS:
                                                 attachInterrupt( BMA423_INT1, bma_irq, GPIO_INTR_POSEDGE );
                                                 break;
                 case POWERMGM_DISABLE_INTERRUPTS:
                                                 detachInterrupt( BMA423_INT1 );
+                                                break;
+            #elif defined( LILYGO_WATCH_2020_S3 )
+                case POWERMGM_ENABLE_INTERRUPTS:
+                                                attachInterrupt( BOARD_BMA423_INT1, bma_irq, GPIO_INTR_POSEDGE );
+                                                break;
+                case POWERMGM_DISABLE_INTERRUPTS:
+                                                detachInterrupt( BOARD_BMA423_INT1 );
                                                 break;
             #elif defined( LILYGO_WATCH_2021 )
                 case POWERMGM_ENABLE_INTERRUPTS:
