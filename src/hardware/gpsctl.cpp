@@ -366,7 +366,7 @@ void gpsctl_on( void ) {
 
             #elif defined( M5CORE2 )
 
-            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
                 #if defined( LILYGO_WATCH_HAS_GPS )
                     TTGOClass *ttgo = TTGOClass::getWatch();
                     ttgo->trunOnGPS();
@@ -405,7 +405,7 @@ void gpsctl_off( void ) {
 
             #elif defined( M5CORE2 )
 
-            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
                 #if defined( LILYGO_WATCH_HAS_GPS )
                     TTGOClass *ttgo = TTGOClass::getWatch();
                     ttgo->turnOffGPS();
@@ -450,7 +450,7 @@ void gpsctl_autoon_on( void ) {
 
                 #elif defined( M5CORE2 )
 
-                #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+                #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
                     #if defined( LILYGO_WATCH_HAS_GPS )
                         TTGOClass *ttgo = TTGOClass::getWatch();
                         ttgo->trunOnGPS();
@@ -478,7 +478,7 @@ void gpsctl_autoon_off( void ) {
 
         #elif defined( M5CORE2 )
 
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
             #if defined( LILYGO_WATCH_HAS_GPS )
                 TTGOClass *ttgo = TTGOClass::getWatch();
                 ttgo->turnOffGPS();

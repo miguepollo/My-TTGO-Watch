@@ -34,7 +34,7 @@
 
     #if defined( M5PAPER )
     #elif defined( M5CORE2 )
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
     #elif defined( WT32_SC01 )
     #else
         #warning "no hardware driver for blestepctl"

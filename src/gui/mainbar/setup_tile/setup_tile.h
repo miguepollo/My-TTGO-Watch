@@ -33,7 +33,7 @@
         #define SETUP_ICON_X_OFFSET         0
         #define SETUP_ICON_Y_OFFSET         0
         #define MAX_SETUP_TILES             1
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( M5CORE2 )
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( M5CORE2 ) || defined( LILYGO_WATCH_2020_S3 )
         #define MAX_SETUP_ICON_HORZ         3
         #define MAX_SETUP_ICON_VERT         2
         #define SETUP_ICON_X_CLEARENCE      8

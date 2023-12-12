@@ -30,7 +30,7 @@
     #include <Arduino.h>
     #ifdef M5PAPER
         #include <M5EPD.h>
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
     #elif defined( LILYGO_WATCH_2021 )    
     #elif defined( WT32_SC01 )
     #else
@@ -52,7 +52,7 @@ void sensor_setup( void ) {
              * setup SHT30 sensor
              */
             M5.SHT30.Begin();
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         #elif defined( WT32_SC01 )
         #endif
     #endif
@@ -97,7 +97,7 @@ bool sensor_powermgm_loop_cb( EventBits_t event, void *arg ) {
                 sensor_send_cb( SENSOR_PRESSURE, (void *)&value );
             }
             retval = true;
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
             retval = true;
         #elif defined( WT32_SC01 )
             retval = true;
@@ -136,7 +136,7 @@ bool sensor_powermgm_event_cb( EventBits_t event, void *arg ) {
                                                     retval = true;
                                                     break;
             }
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
             retval = true;
         #elif defined( WT32_SC01 )
             retval = true;
@@ -156,7 +156,7 @@ bool sensor_get_available( void ) {
     #else
         #ifdef M5PAPER
             retval = true;
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         #elif defined( WT32_SC01 )
         #endif
     #endif
@@ -179,7 +179,7 @@ float sensor_get_temperature( void ) {
     #else
         #ifdef M5PAPER
             temperature = M5.SHT30.GetTemperature();
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         #elif defined( WT32_SC01 )
         #endif
     #endif
@@ -202,7 +202,7 @@ float sensor_get_humidity( void ) {
     #else
         #ifdef M5PAPER
             humidity = M5.SHT30.GetAbsHumidity();
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         #elif defined( WT32_SC01 )
         #endif
     #endif
@@ -225,7 +225,7 @@ float sensor_get_relativ_humidity( void ) {
     #else
         #ifdef M5PAPER
             relativ_humidity = M5.SHT30.GetRelHumidity();
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         #elif defined( WT32_SC01 )
         #endif
     #endif
@@ -247,7 +247,7 @@ float sensor_get_pressure( void ) {
     #ifdef NATIVE_64BIT
     #else
         #ifdef M5PAPER
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         #elif defined( WT32_SC01 )
         #endif
     #endif

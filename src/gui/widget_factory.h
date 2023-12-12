@@ -25,7 +25,13 @@
     #ifdef LV_LVGL_H_INCLUDE_SIMPLE
         #include "lv_core/lv_obj.h"
     #else
-        #include "lvgl/src/lv_core/lv_obj.h"
+        #ifdef LILYGO_WATCH_2020_S3
+            #include "src/lv_core/lv_obj.h"
+        #else
+            #include "lvgl/src/lv_core/lv_obj.h"
+        #endif
+
+        
     #endif
 
     #include "widget_styles.h"

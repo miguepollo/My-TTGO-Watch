@@ -36,7 +36,7 @@
         #elif defined( M5CORE2 )
             #define FRAMEBUFFER_BUFFER_W        RES_X_MAX
             #define FRAMEBUFFER_BUFFER_H        10
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
             #define FRAMEBUFFER_BUFFER_W        RES_X_MAX
             #define FRAMEBUFFER_BUFFER_H        10
         #elif defined( LILYGO_WATCH_2021 )

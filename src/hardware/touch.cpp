@@ -42,7 +42,7 @@ touch_config_t touch_config;
         #include <M5EPD.h>
     #elif defined( M5CORE2 )
         #include <M5Core2.h>
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         #include <TTGO.h>
     #elif defined( LILYGO_WATCH_2021 )    
         #include <Wire.h>
@@ -113,13 +113,13 @@ void touch_setup( void ) {
         M5.Touch.begin();
         pinMode( GPIO_NUM_39, INPUT );
         attachInterrupt( GPIO_NUM_39, &touch_irq, FALLING );
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         TTGOClass *ttgo = TTGOClass::getWatch();
         /*
         * reset/wakeup touch controller
         */
-        #if defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-            ttgo->touchWakup();
+        #if defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) 
+            ttgo->touchWakeup();
         #endif
         /*
         * This changes to polling mode.
@@ -225,7 +225,7 @@ bool touch_powermgm_loop_event_cb( EventBits_t event, void *arg ) {
                     retval = true;        
                     break;
             }
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
             retval = true;
         #elif defined( LILYGO_WATCH_2021 )
             retval = true;
@@ -313,7 +313,7 @@ bool touch_powermgm_event_cb( EventBits_t event, void *arg ) {
                                                 retval = true;
                                                 break;
             }
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             switch( event ) {
                 case POWERMGM_STANDBY:          log_d("go standby");
@@ -326,7 +326,7 @@ bool touch_powermgm_event_cb( EventBits_t event, void *arg ) {
                 case POWERMGM_WAKEUP:           log_d("go wakeup");
 
                                                 if ( touch_lock_take() ) {
-                                                    #if defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+                                                    #if defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) 
                                                         ttgo->touchWakup();
                                                     #endif    
                                                     ttgo->touchToMonitor();
@@ -410,7 +410,7 @@ bool touch_getXY( int16_t &x, int16_t &y ) {
                 touched = false;
                 return( false );
             }
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             static bool touch_press = false;
 
@@ -514,7 +514,7 @@ static bool touch_read(lv_indev_drv_t * drv, lv_indev_data_t*data) {
                 data->state = LV_INDEV_STATE_REL;
             }
 
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
             /*
             * We use two flags, one changes in the interrupt handler
             * the other controls whether we poll the sensor,

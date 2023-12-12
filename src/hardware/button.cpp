@@ -43,7 +43,7 @@ bool button_send_cb( EventBits_t event, void *arg );
         HotZone left_btn( 0, 240, 106, 300 );
         HotZone power_btn( 106, 240, 212, 300 );
         HotZone right_btn( 213, 240, 319, 300 );
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         #include "pmu.h"
         /**
          * special case: on ttgo watch 2020 the button is connected 
@@ -98,7 +98,7 @@ void button_setup( void ) {
              */
             attachInterrupt( M5EPD_KEY_PUSH_PIN, button_irq, FALLING );
         #elif defined( M5CORE2 )
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
             /**
              * special case: on ttgo watch 2020 the button is connected 
              * to the pmu
@@ -300,7 +300,7 @@ bool button_powermgm_loop_cb( EventBits_t event, void *arg ) {
             }
         } 
 
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
     #elif defined( LILYGO_WATCH_2021 ) 
         static bool exit_button = digitalRead( BTN_1 );
         static bool refresh_button = digitalRead( BTN_2 );
@@ -452,7 +452,7 @@ bool button_powermgm_event_cb( EventBits_t event, void *arg ) {
                     break;
             }
             retval = true;
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
             retval = true;
         #elif defined( LILYGO_WATCH_2021 ) 
             switch( event ) {

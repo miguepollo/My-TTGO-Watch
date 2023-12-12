@@ -32,8 +32,9 @@
         #include <M5EPD.h>
     #elif defined( M5CORE2 )
         #include <M5Core2.h>
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) 
         #include <TTGO.h>
+    #elif  defined( LILYGO_WATCH_2020_S3 )
     #elif defined( LILYGO_WATCH_2021 )
         #include <twatch2021_config.h>
         #include <QMC5883LCompass.h>
@@ -63,7 +64,7 @@ void compass_setup( void ) {
     #else
         #if defined( M5PAPER )
         #elif defined( M5CORE2 )
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         #elif defined( LILYGO_WATCH_2021 )
             compass.init();
             compass_off();
@@ -82,7 +83,7 @@ static bool compass_powermgm_event_cb( EventBits_t event, void *arg ) {
     #else
         #if defined( M5PAPER )
         #elif defined( M5CORE2 )
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         #elif defined( LILYGO_WATCH_2021 )
             switch( event ) {
                 case POWERMGM_STANDBY:
@@ -118,7 +119,7 @@ static bool compass_powermgm_loop_event_cb( EventBits_t event, void *arg ) {
             #else
                 #if defined( M5PAPER )
                 #elif defined( M5CORE2 )
-                #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+                #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
                 #elif defined( LILYGO_WATCH_2021 )
                         compass.setCalibration( calibrationData[0][0], calibrationData[0][1], calibrationData[1][0], calibrationData[1][1], calibrationData[2][0], calibrationData[2][1] );
                 #elif defined( WT32_SC01 )
@@ -160,7 +161,7 @@ static bool compass_get_data( compass_data_t *compass_data ) {
     #else
         #if defined( M5PAPER )
         #elif defined( M5CORE2 )
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         #elif defined( LILYGO_WATCH_2021 )
             compass.read();
             compass_data->x = compass.getX();
@@ -238,7 +239,7 @@ void compass_on( void ) {
     #else
         #if defined( M5PAPER )
         #elif defined( M5CORE2 )
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         #elif defined( LILYGO_WATCH_2021 )
             compass.init();
             compass.setReset();
@@ -258,7 +259,7 @@ void compass_off( void ) {
     #else
         #if defined( M5PAPER )
         #elif defined( M5CORE2 )
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         #elif defined( LILYGO_WATCH_2021 )
             compass.init();
             compass.setReset();
@@ -302,7 +303,7 @@ bool compass_available( void ) {
     #else
         #if defined( M5PAPER )
         #elif defined( M5CORE2 )
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         #elif defined( LILYGO_WATCH_2021 )
             retval = true;
         #elif defined( WT32_SC01 )

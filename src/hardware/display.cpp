@@ -33,8 +33,10 @@
         #include <M5EPD.h>
     #elif defined( M5CORE2 )
         #include <M5Core2.h>
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) 
         #include <TTGO.h>
+    #elif defined( LILYGO_WATCH_2020_S3 )
+        #include <../lib/twatch2020s3/utilities.h>
     #elif defined( LILYGO_WATCH_2021 )
         #include <twatch2021_config.h>
     #elif defined( WT32_SC01 )
@@ -76,6 +78,8 @@ void display_setup( void ) {
             ttgo->bl->adjust( 0 );
             ttgo->tft->setRotation( display_config.rotation / 90 );
             bma_set_rotate_tilt( display_config.rotation );
+        #elif defined( LILYGO_WATCH_2020_S3 )
+            
         #elif defined( LILYGO_WATCH_2021 )
             pinMode(TFT_LED, OUTPUT);
             ledcSetup(0, 4000, 8);
@@ -145,7 +149,7 @@ static bool display_powermgm_loop_cb( EventBits_t event, void *arg ) {
             }
 
             retval = true;
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) 
             TTGOClass *ttgo = TTGOClass::getWatch();
             /**
              * check if backlight adjust has change
@@ -159,6 +163,32 @@ static bool display_powermgm_loop_cb( EventBits_t event, void *arg ) {
                     brightness--;
                     ttgo->bl->adjust( brightness );
                 }
+            }
+            /**
+             * check timeout
+             */
+            if ( display_get_timeout() != DISPLAY_MAX_TIMEOUT ) {
+                if ( lv_disp_get_inactive_time(NULL) > ( ( display_get_timeout() * 1000 ) - display_get_brightness() * 8 ) ) {
+                    dest_brightness = ( ( display_get_timeout() * 1000 ) - lv_disp_get_inactive_time( NULL ) ) / 8 ;
+                }
+                else {
+                    dest_brightness = display_get_brightness();
+                }
+            }
+
+            retval = true;
+        #elif defined( LILYGO_WATCH_2020_S3 )
+            /**
+             * check if backlight adjust has change
+             */
+            if ( dest_brightness != brightness ) {
+                if ( brightness < dest_brightness ) {
+                    brightness++;
+                }
+                else {
+                    brightness--;
+                }
+                watch.setBrightness(brightness);
             }
             /**
              * check timeout
@@ -270,12 +300,16 @@ static void display_standby( void ) {
                 ttgo->power->setPowerOutPut( AXP202_LDO2, false );
                 ttgo->power->setPowerOutPut( AXP202_LDO3, false );
             #endif
+        #elif defined( LILYGO_WATCH_2020_S3 )
+            watch.setBrightness(0);
+            brightness = 0;
+            dest_brightness = 0;
         #elif defined( LILYGO_WATCH_2021 )   
             ledcWrite( 0, 0 );
         #elif defined( WT32_SC01 )
             ledcWrite( 0, 0 );
         #else
-            #error "no display statndby function implemented, please setup minimal drivers ( display/framebuffer/touch )"
+            #error "no display standby function implemented, please setup minimal drivers ( display/framebuffer/touch )"
         #endif
     #endif
     log_d("go standby");
@@ -306,6 +340,10 @@ static void display_wakeup( bool silence ) {
                 ttgo->openBL();
                 ttgo->displayWakeup();
                 ttgo->bl->adjust( 0 );
+                brightness = 0;
+                dest_brightness = 0;
+            #elif defined( LILYGO_WATCH_2020_S3 )
+                watch.setBrightness(0);
                 brightness = 0;
                 dest_brightness = 0;
             #elif defined( LILYGO_WATCH_2021 )   
@@ -343,6 +381,10 @@ static void display_wakeup( bool silence ) {
                 ttgo->openBL();
                 ttgo->displayWakeup();
                 ttgo->bl->adjust( 0 );
+                brightness = 0;
+                dest_brightness = display_get_brightness();
+            #elif defined( LILYGO_WATCH_2020_S3 )
+                watch.setBrightness(0);
                 brightness = 0;
                 dest_brightness = display_get_brightness();
             #elif defined( LILYGO_WATCH_2021 )   
@@ -428,11 +470,12 @@ void display_set_rotation( uint32_t rotation ) {
     #else
         #if defined( M5PAPER )
         #elif defined( M5CORE2 )
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) 
             TTGOClass *ttgo = TTGOClass::getWatch();
             display_config.rotation = rotation;
             ttgo->tft->setRotation( rotation / 90 );
         #elif defined( WT32_SC01 )
+        #elif defined( LILYGO_WATCH_2020_S3 )
         #else
             #warning "no display set rotation function implemented, please setup minimal drivers ( display/framebuffer/touch )"
         #endif

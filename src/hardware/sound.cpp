@@ -35,7 +35,7 @@
     * based on https://github.com/earlephilhower/ESP8266Audio
     */
     #if defined( M5PAPER )
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         #include "TTGO.h"
 
         #include "AudioFileSourceSPIFFS.h"
@@ -89,7 +89,7 @@ void sound_setup( void ) {
     #ifdef NATIVE_64BIT
 
     #else
-        #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
+        #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
             /*
             * set sound chip voltage on V1
             */
@@ -131,7 +131,7 @@ bool sound_get_available( void ) {
 
     #ifdef NATIVE_64BIT
     #else
-        #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
+        #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
             retval = true;
         #endif
     #endif
@@ -171,7 +171,7 @@ bool sound_powermgm_loop_cb( EventBits_t event, void *arg ) {
 #ifdef NATIVE_64BIT
 
 #else
-    #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
+    #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         if ( sound_config.enable && sound_init ) {
             // we call sound_set_enabled(false) to ensure the PMU stops all power
             if ( mp3->isRunning() && !mp3->loop() ) {
@@ -239,7 +239,7 @@ void sound_set_enabled( bool enabled ) {
 #ifdef NATIVE_64BIT
 
 #else
-    #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
+    #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         if ( enabled ) {
             /**
              * ttgo->enableAudio() is not working
@@ -247,7 +247,7 @@ void sound_set_enabled( bool enabled ) {
             #if     defined( LILYGO_WATCH_2020_V1 )
                     TTGOClass *ttgo = TTGOClass::getWatch();
                     ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_ON );
-            #elif   defined( LILYGO_WATCH_2020_V3 )
+            #elif   defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
                     TTGOClass *ttgo = TTGOClass::getWatch();
                     ttgo->power->setPowerOutPut( AXP202_LDO4, AXP202_ON );
             #endif
@@ -264,7 +264,7 @@ void sound_set_enabled( bool enabled ) {
             #if     defined( LILYGO_WATCH_2020_V1 )
                     TTGOClass *ttgo = TTGOClass::getWatch();
                     ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_OFF );
-            #elif   defined( LILYGO_WATCH_2020_V3 )
+            #elif   defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
                     TTGOClass *ttgo = TTGOClass::getWatch();
                     ttgo->power->setPowerOutPut( AXP202_LDO4, AXP202_OFF );
             #endif
@@ -283,7 +283,7 @@ void sound_play_spiffs_mp3( const char *filename ) {
 #ifdef NATIVE_64BIT
 
 #else
-    #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
+    #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         if ( sound_config.enable && sound_init && !sound_is_silenced() ) {
             sound_set_enabled( sound_config.enable );
             log_d("playing file %s from SPIFFS", filename);
@@ -307,7 +307,7 @@ void sound_play_progmem_wav( const void *data, uint32_t len ) {
 #ifdef NATIVE_64BIT
 
 #else
-    #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
+    #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         if ( sound_config.enable && sound_init && !sound_is_silenced() ) {
             sound_set_enabled( sound_config.enable );
             log_d("playing audio (size %d) from PROGMEM ", len );
@@ -330,7 +330,7 @@ void sound_speak( const char *str ) {
 #ifdef NATIVE_64BIT
 
 #else
-    #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
+    #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         if ( sound_config.enable && sound_init && !sound_is_silenced() ) {
             sound_set_enabled( sound_config.enable );
             log_d("Speaking text", str);
@@ -420,7 +420,7 @@ void sound_set_volume_config( uint8_t volume ) {
 #ifdef NATIVE_64BIT
 
 #else
-    #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
+    #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         if ( sound_config.enable && sound_init ) {
             log_d("Setting sound volume to: %d", volume);
             // limiting max gain to 3.5 (max gain is 4.0)

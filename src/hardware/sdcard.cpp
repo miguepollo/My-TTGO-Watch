@@ -36,7 +36,7 @@
         #include <M5Core2.h>
 
         SPIClass *sdhander = nullptr;
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         #include <TTGO.h>
         
         #if defined( LILYGO_WATCH_HAS_SDCARD )
@@ -80,7 +80,7 @@ void sdcard_setup( void ) {
 
         sdcard_mounted = true;
 */
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         #if defined( LILYGO_WATCH_HAS_SDCARD )
             /**
              * as small hack to reduce internal heap memory
@@ -154,7 +154,7 @@ bool sdcard_powermgm_event_cb( EventBits_t event, void *arg ) {
                 break;
         }
 */
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         #if defined( LILYGO_WATCH_HAS_SDCARD )
             switch( event ) {
                 case POWERMGM_SILENCE_WAKEUP:

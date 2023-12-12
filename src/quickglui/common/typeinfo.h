@@ -40,7 +40,7 @@ public:
     bool isWidget() const { return strcmp(name(), Widget::TypeName) == 0; }
   
 private:
-      lv_obj_type_t native;
+    lv_obj_type_t native;
 };
 
 #endif

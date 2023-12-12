@@ -45,6 +45,8 @@
         #define FIRMWARE_UPDATE_URL            "http://www.neo-guerillaz.de/m5stack-core2.version.json"
     #elif defined( WT32_SC01 )
         #define FIRMWARE_UPDATE_URL            "http://www.neo-guerillaz.de/wt32-sc01_v3_3.version.json"
+    #elif defined(LILYGO_WATCH_2020_S3 )
+        #define FIRMWARE_UPDATE_URL            "http://www.neo-guerillaz.de/ttgo-t-watch2020_v3.version.json"  
     #endif
 
     #if !defined( FIRMWARE_UPDATE_URL )

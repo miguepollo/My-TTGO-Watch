@@ -33,6 +33,17 @@
     #include "utils/logging.h"
 
     static EventBits_t powermgm_status;
+#elif defined( LILYGO_WATCH_2020_S3 )
+    #include "esp_err.h"
+    #include "esp_pm.h"
+    #include <Arduino.h>
+    #include <Ticker.h>
+
+    Ticker *powermgm_tickTicker = nullptr;
+    EventGroupHandle_t powermgm_status = NULL;
+    TaskHandle_t _powermgmTask;
+    portMUX_TYPE DRAM_ATTR powermgmMux = portMUX_INITIALIZER_UNLOCKED;
+    esp_pm_config_esp32s3_t pm_config;
 #else
     #include "esp_err.h"
     #include "esp_pm.h"

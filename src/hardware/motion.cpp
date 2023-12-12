@@ -41,13 +41,18 @@
 
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #include <TTGO.h>
-    #elif defined( LILYGO_WATCH_2021 )
-        #include <twatch2021_config.h>
-        #include <Arduino.h>
-        #include <Wire.h>
-        #include <bma.h>
-
-        BMA423 bma;
+    #elif defined( LILYGO_WATCH_2021 ) || defined( LILYGO_WATCH_2020_S3 )
+        #if defined( LILYGO_WATCH_2021 )
+            #include <twatch2021_config.h>
+            #include <Arduino.h>
+            #include <Wire.h>
+            #include <bma.h>
+            BMA423 bma;
+        #elif defined( LILYGO_WATCH_2020_S3 )
+            #include <Wire.h>
+            #include <SPI.h>
+            SensorBMA423 bma;
+        #endif
 
         uint16_t readRegister(uint8_t address, uint8_t reg, uint8_t *data, uint16_t len) {
             Wire.beginTransmission(0x18);
@@ -132,7 +137,7 @@ void bma_setup( void ) {
                 log_w("stepcounter not valid. reset");
             }
             stepcounter = stepcounter + stepcounter_before_reset;
-        #elif defined( LILYGO_WATCH_2021 )
+        #elif defined( LILYGO_WATCH_2021 ) || defined( LILYGO_WATCH_2020_S3 )
             if ( stepcounter_valid != 0xa5a5a5a5 ) {
                 stepcounter = 0;
                 stepcounter_before_reset = 0;
@@ -166,7 +171,18 @@ void bma_setup( void ) {
              */
             pinMode( BMA423_INT1, INPUT );
             attachInterrupt( BMA423_INT1, bma_irq, GPIO_INTR_POSEDGE );
-        #elif defined( LILYGO_WATCH_2021 )
+        #elif  defined( LILYGO_WATCH_2020_S3 )
+            /*
+             * init stepcounter
+             */
+            watch.attachBMA();
+            bma.direction();
+            /*
+             * init stepcounter interrupt function
+             */
+            pinMode( BOARD_BMA423_INT1, INPUT );
+            attachInterrupt( BOARD_BMA423_INT1, bma_irq, GPIO_INTR_POSEDGE );
+        #elif defined( LILYGO_WATCH_2021 ) 
             ASSERT( bma.begin( readRegister, writeRegister, delay ), "BMA423 was not found. Please check wiring/power." );
             /**
              * config Accel
@@ -242,7 +258,7 @@ bool bma_powermgm_event_cb( EventBits_t event, void *arg ) {
         #ifdef NATIVE_64BIT
         #else
             #ifdef M5PAPER
-            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
                 case POWERMGM_ENABLE_INTERRUPTS:
                                                 attachInterrupt( BMA423_INT1, bma_irq, GPIO_INTR_POSEDGE );
                                                 break;
@@ -280,7 +296,7 @@ bool bma_powermgm_loop_cb( EventBits_t event , void *arg ) {
         bma_irq_flag = false;
         portEXIT_CRITICAL(&BMA_IRQ_Mux);
         #ifdef M5PAPER
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
         #endif
     #endif
     /*
@@ -309,7 +325,7 @@ bool bma_powermgm_loop_cb( EventBits_t event , void *arg ) {
                 if ( ttgo->bma->isStepCounter() ) {
                     BMA_stepcounter = true;
                 }
-            #elif defined( LILYGO_WATCH_2021 )
+            #elif defined( LILYGO_WATCH_2021 ) || defined( LILYGO_WATCH_2020_S3 )
                 /*
                 * set powermgm wakeup event and save BMA_* event
                 */
@@ -375,7 +391,7 @@ void bma_notify_stepcounter( void ) {
     #ifdef NATIVE_64BIT
     #else
         #ifdef M5PAPER
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             stepcounter_before_reset = ttgo->bma->getCounter();
         #elif defined( LILYGO_WATCH_2021 )
@@ -398,7 +414,7 @@ void bma_standby( void ) {
         #ifdef NATIVE_64BIT
         #else
             #ifdef M5PAPER
-            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
                 TTGOClass *ttgo = TTGOClass::getWatch();
                 ttgo->bma->enableStepCountInterrupt( false );
             #elif defined( LILYGO_WATCH_2021 )
@@ -414,7 +430,7 @@ void bma_standby( void ) {
     #ifdef NATIVE_64BIT
     #else
         #ifdef M5PAPER
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
             gpio_wakeup_enable ( (gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL);
             esp_sleep_enable_gpio_wakeup ();
         #elif defined( LILYGO_WATCH_2021 )
@@ -436,7 +452,7 @@ void bma_wakeup( void ) {
         #ifdef NATIVE_64BIT
         #else
             #ifdef M5PAPER
-            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
                 TTGOClass *ttgo = TTGOClass::getWatch();
                 ttgo->bma->enableStepCountInterrupt( true );
             #elif defined( LILYGO_WATCH_2021 )
@@ -474,7 +490,7 @@ void bma_wakeup( void ) {
             #ifdef NATIVE_64BIT
             #else
                 #ifdef M5PAPER
-                #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+                #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
                     TTGOClass *ttgo = TTGOClass::getWatch();
                     ttgo->bma->resetStepCounter();
                 #elif defined( LILYGO_WATCH_2021 )
@@ -501,7 +517,7 @@ void bma_reload_settings( void ) {
     #ifdef NATIVE_64BIT
     #else
         #ifdef M5PAPER
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             ttgo->bma->enableStepCountInterrupt( bma_config.enable[ BMA_STEPCOUNTER ] );
             ttgo->bma->enableWakeupInterrupt( bma_config.enable[ BMA_DOUBLECLICK ] );
@@ -552,7 +568,7 @@ void bma_set_rotate_tilt( uint32_t rotation ) {
     #ifdef NATIVE_64BIT
     #else
         #ifdef M5PAPER
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
             struct bma423_axes_remap remap_data;
             TTGOClass *ttgo = TTGOClass::getWatch();
             #if defined( LILYGO_WATCH_2020_V2 )
@@ -648,7 +664,7 @@ void bma_reset_stepcounter( void ) {
     #ifdef NATIVE_64BIT
     #else
         #ifdef M5PAPER
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             ttgo->bma->resetStepCounter();
         #elif defined( LILYGO_WATCH_2021 )
