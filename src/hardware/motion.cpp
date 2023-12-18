@@ -575,7 +575,7 @@ void bma_set_rotate_tilt( uint32_t rotation ) {
     #ifdef NATIVE_64BIT
     #else
         #ifdef M5PAPER
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             struct bma423_axes_remap remap_data;
             TTGOClass *ttgo = TTGOClass::getWatch();
             #if defined( LILYGO_WATCH_2020_V2 )
@@ -584,6 +584,43 @@ void bma_set_rotate_tilt( uint32_t rotation ) {
                  */
                 rotation = rotation + 270;
             #endif
+            rotation = rotation % 360;
+            switch( rotation / 90 ) {
+                case 0:     remap_data.x_axis = 0;
+                            remap_data.x_axis_sign = 1;
+                            remap_data.y_axis = 1;
+                            remap_data.y_axis_sign = 1;
+                            remap_data.z_axis  = 2;
+                            remap_data.z_axis_sign  = 1;
+                            ttgo->bma->set_remap_axes(&remap_data);
+                            break;
+                case 1:     remap_data.x_axis = 1;
+                            remap_data.x_axis_sign = 1;
+                            remap_data.y_axis = 0;
+                            remap_data.y_axis_sign = 0;
+                            remap_data.z_axis  = 2;
+                            remap_data.z_axis_sign  = 1;
+                            ttgo->bma->set_remap_axes(&remap_data);
+                            break;
+                case 2:     remap_data.x_axis = 0;
+                            remap_data.x_axis_sign = 1;
+                            remap_data.y_axis = 1;
+                            remap_data.y_axis_sign = 0;
+                            remap_data.z_axis  = 2;
+                            remap_data.z_axis_sign  = 1;
+                            ttgo->bma->set_remap_axes(&remap_data);
+                            break;
+                case 3:     remap_data.x_axis = 1;
+                            remap_data.x_axis_sign = 1;
+                            remap_data.y_axis = 0;
+                            remap_data.y_axis_sign = 1;
+                            remap_data.z_axis  = 2;
+                            remap_data.z_axis_sign  = 1;
+                            ttgo->bma->set_remap_axes(&remap_data);
+                            break;
+            }
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+            struct bma423_axes_remap remap_data;
             rotation = rotation % 360;
             switch( rotation / 90 ) {
                 case 0:     remap_data.x_axis = 0;

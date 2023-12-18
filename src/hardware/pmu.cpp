@@ -183,7 +183,7 @@ void pmu_setup( void ) {
             int failCounter = 0;
             log_i("init AXP charging settings and control to 200Hz, 300mA, Coulomcounter");
 
-            if ( pmu.setChargeControlCur( 300 ) != AXP_PASS ) {
+            if ( pmu.setChargerConstantCurr( 300 ) != AXP_PASS ) {
                 log_e("charge current set failed!");
                 failCounter++;
             }
