@@ -619,7 +619,7 @@ void bma_set_rotate_tilt( uint32_t rotation ) {
                             ttgo->bma->set_remap_axes(&remap_data);
                             break;
             }
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+        #elif defined( LILYGO_WATCH_2020_S3 )
             struct bma423_axes_remap remap_data;
             rotation = rotation % 360;
             switch( rotation / 90 ) {

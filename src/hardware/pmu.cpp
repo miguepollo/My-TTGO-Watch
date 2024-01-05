@@ -179,11 +179,11 @@ void pmu_setup( void ) {
          * if ADC sampling rate != 200, init charging current, samplingrate and coulomcounter
          */
         log_i("Init AXP2101 pmu controller");
-        if( pmu.getAdcSamplingRate() != 200 ) {
+/*       if( pmu.getAdcSamplingRate() != 200 ) {
             int failCounter = 0;
             log_i("init AXP charging settings and control to 200Hz, 300mA, Coulomcounter");
 
-            if ( pmu.setChargerConstantCurr( 300 ) != AXP_PASS ) {
+           if ( pmu.setChargerConstantCurr( 300 ) != AXP_PASS ) {
                 log_e("charge current set failed!");
                 failCounter++;
             }
@@ -206,6 +206,7 @@ void pmu_setup( void ) {
         /*
          * Turn on the IRQ used
          */
+        /*
         ttgo->power->adc1Enable( AXP202_BATT_VOL_ADC1 | AXP202_BATT_CUR_ADC1 | AXP202_VBUS_VOL_ADC1 | AXP202_VBUS_CUR_ADC1, AXP202_ON);
         ttgo->power->enableIRQ( AXP202_VBUS_REMOVED_IRQ | AXP202_VBUS_CONNECT_IRQ
                                 | AXP202_CHARGING_FINISHED_IRQ | AXP202_CHARGING_IRQ
@@ -213,9 +214,7 @@ void pmu_setup( void ) {
                                 | AXP202_BATT_REMOVED_IRQ | AXP202_BATT_CONNECT_IRQ
                                 , AXP202_ON );
         ttgo->power->clearIRQ();
-        /*
-        * enable coulumb counter and set target voltage for charging
-        */
+
         if ( pmu_config.high_charging_target_voltage ) {
             log_d("set target voltage to 4.36V");
             if ( pmu.setChargeTargetVoltage(4.36) )
@@ -226,9 +225,7 @@ void pmu_setup( void ) {
             if (pmu.setChargeTargetVoltage(4.2 ))
                 log_e("target voltage 4.2V set failed!");
         }
-        /*
-        * Turn off unused power
-        */
+
         ttgo->power->setPowerOutPut( AXP202_EXTEN, AXP212_OFF );
         ttgo->power->setPowerOutPut( AXP202_DCDC2, AXP202_OFF );
         ttgo->power->setPowerOutPut( AXP202_LDO4, AXP2101_OFF );
@@ -374,7 +371,7 @@ void pmu_loop( void ) {
         if ( temp_pmu_irq_flag ) {
             log_e("hello Mc Fly, witch AXP irq on M5Core2?");
         }
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         TTGOClass *ttgo = TTGOClass::getWatch();
 
         static bool plug = ttgo->power->isVBUSPlug();
@@ -432,6 +429,129 @@ void pmu_loop( void ) {
                 powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
                 log_w("set target voltage to 4.20V after high target charging");
                 if ( ttgo->power->setChargingTargetVoltage( AXP202_TARGET_VOL_4_2V ) )
+                    log_e("target voltage 4.20V set failed!");
+                charging = false;
+            }
+            if ( ttgo->power->isBattPlugInIRQ() ) {
+                /*
+                * set an wakeup request and
+                * set variable charging to false
+                */
+                log_d("AXP202: BattPlugInIRQ");
+                powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+                battery = true;
+            }
+            if ( ttgo->power->isBattRemoveIRQ() ) {
+                /*
+                * set an wakeup request and
+                * set variable charging to false
+                */
+                log_d("AXP202: BattRemoveIRQ");
+                powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+                battery = false;
+            }
+            if ( ttgo->power->isPEKShortPressIRQ() ) {
+                /*
+                * set an wakeup request
+                * clear IRQ state
+                * send PMUCTL_SHORT_PRESS event
+                * fast return for faster wakeup
+                */
+                ttgo->power->clearIRQ();
+                log_d("AXP202: PEKShortPressIRQ");
+                pmu_send_cb( PMUCTL_SHORT_PRESS, NULL );
+                return;
+            }
+            if ( ttgo->power->isPEKLongtPressIRQ() ) {
+                /*
+                * clear IRQ state
+                * set an wakeup request
+                * send PMUCTL_LONG_PRESS event
+                * fast return for faster wakeup
+                */
+                ttgo->power->clearIRQ();
+                log_d("AXP202: PEKLongtPressIRQ");
+                pmu_send_cb( PMUCTL_LONG_PRESS, NULL );
+                return;
+            }
+            if ( ttgo->power->isTimerTimeoutIRQ() ) {
+                /*
+                * clear pmu timer and IRQ state
+                * set an silence wakeup request
+                * send PMUCTL_LONG_PRESS event
+                * fast return for faster wakeup
+                */
+                ttgo->power->clearTimerStatus();
+                ttgo->power->offTimer();
+                ttgo->power->clearIRQ();
+                log_d("AXP202: TimerTimeoutIRQ");
+                powermgm_set_event( POWERMGM_SILENCE_WAKEUP_REQUEST );
+                pmu_send_cb( PMUCTL_TIMER_TIMEOUT, NULL );
+                return;
+            }
+            /*
+            * clear IRQ
+            * set update flag
+            */
+            ttgo->power->clearIRQ();
+            pmu_update = true;
+        }
+    #elif defined( LILYGO_WATCH_2020_S3 )
+        static bool plug = watch.isVbusIn();
+        static bool charging = watch.isCharging();
+        static bool battery = watch.isBatteryConnect();
+
+        if ( temp_pmu_irq_flag ) {        
+ //           watch.readIRQ();
+            if ( watch.isVbusInsertIrq() ) {
+                /*
+                * set an wakeup request and
+                * delete old charging logfile when plug in and
+                * set variable plug to true
+                */
+                log_d("AXP2101: VBusPlugInIRQ");
+                powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+                if ( pmu_config.high_charging_target_voltage ) {
+                    log_w("set target voltage to 4.36V for high target charging");
+                    if ( watch.setChargeTargetVoltage( 4.36 ) )
+                        log_e("target voltage 4.36V set failed!");
+                }
+                else {
+                    log_d("set target voltage to 4.20V for charging");
+                    if ( watch.setChargeTargetVoltage( 4.2 ) )
+                        log_e("target voltage 4.20V set failed!");
+                }
+                plug = true;
+            }
+            if ( watch.isVbusRemoveIrq() ) {
+                /*
+                * set an wakeup request and
+                * remove old discharging log file when unplug
+                * set variable plug and chargingto false
+                */
+                log_d("AXP2101: VBusRemoteInIRQ");
+                powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+                charging = false;
+                plug = false;
+            }
+            if ( watch.isBatChagerStartIrq() ) {
+                /*
+                * set an wakeup request and
+                * set variable charging to true
+                */
+                log_d("AXP2101: ChargingIRQ");
+                powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+                charging = true;
+            }
+            if ( ttgo->power->isChargingDoneIRQ() ) {
+                /*
+                * set an wakeup request and
+                * set variable charging to false
+                */
+                log_d("AXP202: ChargingDoneIRQ");
+                powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+                log_w("set target voltage to 4.20V after high target charging");
+                if ( watch.setChargeTargetVoltage( 4.2 ) )
                     log_e("target voltage 4.20V set failed!");
                 charging = false;
             }
