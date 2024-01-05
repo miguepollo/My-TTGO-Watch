@@ -767,7 +767,7 @@ void pmu_standby( void ) {
             esp_sleep_enable_timer_wakeup( pmu_config.silence_wakeup_interval * 60 * 1000000 );
             log_d("enable wakeup timer (%d sec)", pmu_config.silence_wakeup_interval * 60 );
         }
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         TTGOClass *ttgo = TTGOClass::getWatch();
 
         ttgo->power->clearTimerStatus();
@@ -809,6 +809,44 @@ void pmu_standby( void ) {
          */
         gpio_wakeup_enable( (gpio_num_t)AXP202_INT, GPIO_INTR_LOW_LEVEL );
         esp_sleep_enable_gpio_wakeup ();
+    #elif defined( LILYGO_WATCH_2020_S3 )
+
+        ttgo->power->clearTimerStatus();
+        /*
+            * if silence wakeup enabled set the wakeup timer, depending on vplug
+            */
+        if ( pmu_get_silence_wakeup() ) {
+            if ( watch.isCharging() || watch.isVbusIn() ) {
+                ttgo->power->setTimer( pmu_config.silence_wakeup_interval_vbplug );
+                log_d("enable silence wakeup timer, %dmin", pmu_config.silence_wakeup_interval_vbplug );
+            }
+            else {
+                ttgo->power->setTimer( pmu_config.silence_wakeup_interval );
+                log_d("enable silence wakeup timer, %dmin", pmu_config.silence_wakeup_interval );
+            }
+        }
+
+        /*
+            * set powersave voltage depending on settings
+            */
+        if ( pmu_get_experimental_power_save() ) {
+            watch.setDC3Voltage( pmu_config.experimental_power_save_voltage );
+            log_d("go standby, enable %dmV standby voltage", pmu_config.experimental_power_save_voltage );
+        } 
+        else {
+            watch.setDC3Voltage( pmu_config.normal_power_save_voltage );
+            log_d("go standby, enable %dmV standby voltage", pmu_config.normal_power_save_voltage );
+        }
+            /*
+                * disable LD02, sound?
+                */
+            ttgo->power->setPowerOutPut( AXP202_LDO2, AXP202_OFF );
+        #endif
+        /*
+         * enable GPIO in lightsleep for wakeup
+         */
+        gpio_wakeup_enable( (gpio_num_t)BOARD_PMU_INT, GPIO_INTR_LOW_LEVEL );
+        esp_sleep_enable_gpio_wakeup ();
     #elif  defined( LILYGO_WATCH_2021 )
         digitalWrite( PWR_ON, LOW );
     #endif
@@ -838,7 +876,7 @@ void pmu_wakeup( void ) {
         }
     #elif defined( M5CORE2 )
         M5.Axp.RestoreFromLightSleep();
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         TTGOClass *ttgo = TTGOClass::getWatch();
         /*
         * set normal voltage depending on settings
@@ -868,6 +906,31 @@ void pmu_wakeup( void ) {
              */
             ttgo->power->setPowerOutPut( AXP202_LDO2, AXP202_ON );    
         #endif
+    #elif defined( LILYGO_WATCH_2020_S3 )
+        /*
+        * set normal voltage depending on settings
+        */
+        if ( pmu_get_experimental_power_save() ) {
+            watch.setDC3Voltage( pmu_config.experimental_normal_voltage );
+            log_d("go wakeup, enable %dmV voltage", pmu_config.experimental_normal_voltage );
+        } 
+        else {
+            watch.setDC3Voltage( pmu_config.normal_voltage );
+            log_d("go wakeup, enable %dmV voltage", pmu_config.normal_voltage );
+        }
+        /*
+        * clear timer
+        */
+        ttgo->power->clearTimerStatus();
+        ttgo->power->offTimer();
+        /*
+        * enable LDO2, backlight?
+        */
+
+        /*
+         * disable LD02, sound?
+         */
+        ttgo->power->setPowerOutPut( AXP202_LDO2, AXP202_ON );    
     #elif  defined( LILYGO_WATCH_2021 )
         digitalWrite( PWR_ON, HIGH );
     #endif
@@ -911,7 +974,7 @@ void pmu_set_high_charging_target_voltage( bool value ) {
 
     #elif defined( M5CORE2 )
 
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         TTGOClass *ttgo = TTGOClass::getWatch();
 
         pmu_config.high_charging_target_voltage = value;
@@ -924,6 +987,19 @@ void pmu_set_high_charging_target_voltage( bool value ) {
         else {
             log_d("set target voltage to 4.2V");
             if ( ttgo->power->setChargingTargetVoltage( AXP202_TARGET_VOL_4_2V ) )
+                log_e("target voltage 4.2V set failed!");
+        }
+    #elif defined( LILYGO_WATCH_2020_S3 )
+            pmu_config.high_charging_target_voltage = value;
+
+        if ( pmu_config.high_charging_target_voltage ) {
+            log_d("set target voltage to 4.36V");
+            if ( watch.setChargeTargetVoltage( 4.36 ) )
+                log_e("target voltage 4.36V set failed!");
+        }
+        else {
+            log_d("set target voltage to 4.2V");
+            if ( watch.setChargeTargetVoltage( 4.2 ) )
                 log_e("target voltage 4.2V set failed!");
         }
     #endif
@@ -966,10 +1042,13 @@ void pmu_set_safe_voltage_for_update( void ) {
 
         #elif defined( M5CORE2 )
         
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             
             ttgo->power->setDCDC3Voltage( NORMALVOLTAGE + 100 );
+            log_d("set %dmV voltage", NORMALVOLTAGE );
+        #elif defined( LILYGO_WATCH_2020_S3 )
+            watch.setDC3Voltage( NORMALVOLTAGE + 100 );
             log_d("set %dmV voltage", NORMALVOLTAGE );
         #endif
 
