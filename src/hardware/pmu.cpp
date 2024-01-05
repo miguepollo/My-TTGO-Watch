@@ -543,28 +543,28 @@ void pmu_loop( void ) {
                 powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
                 charging = true;
             }
-            if ( ttgo->power->isChargingDoneIRQ() ) {
+            if ( watch.isBatChagerDoneIrq() ) {
                 /*
                 * set an wakeup request and
                 * set variable charging to false
                 */
-                log_d("AXP202: ChargingDoneIRQ");
+                log_d("AXP2101: ChargingDoneIRQ");
                 powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
                 log_w("set target voltage to 4.20V after high target charging");
                 if ( watch.setChargeTargetVoltage( 4.2 ) )
                     log_e("target voltage 4.20V set failed!");
                 charging = false;
             }
-            if ( ttgo->power->isBattPlugInIRQ() ) {
+            if ( watch.isBatChagerStartIrq() ) {
                 /*
                 * set an wakeup request and
                 * set variable charging to false
                 */
-                log_d("AXP202: BattPlugInIRQ");
+                log_d("AXP2101: BattPlugInIRQ");
                 powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
                 battery = true;
             }
-            if ( ttgo->power->isBattRemoveIRQ() ) {
+            if ( watch.isBatRemoveIrq() ) {
                 /*
                 * set an wakeup request and
                 * set variable charging to false
@@ -573,31 +573,31 @@ void pmu_loop( void ) {
                 powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
                 battery = false;
             }
-            if ( ttgo->power->isPEKShortPressIRQ() ) {
+            if (watch.isPekeyShortPressIrq() ) {
                 /*
                 * set an wakeup request
                 * clear IRQ state
                 * send PMUCTL_SHORT_PRESS event
                 * fast return for faster wakeup
                 */
-                ttgo->power->clearIRQ();
+                watch.clearIrqStatus();
                 log_d("AXP202: PEKShortPressIRQ");
                 pmu_send_cb( PMUCTL_SHORT_PRESS, NULL );
                 return;
             }
-            if ( ttgo->power->isPEKLongtPressIRQ() ) {
+            if ( watch.isPekeyLongPressIrq() ) {
                 /*
                 * clear IRQ state
                 * set an wakeup request
                 * send PMUCTL_LONG_PRESS event
                 * fast return for faster wakeup
                 */
-                ttgo->power->clearIRQ();
+                watch.clearIrqStatus();
                 log_d("AXP202: PEKLongtPressIRQ");
                 pmu_send_cb( PMUCTL_LONG_PRESS, NULL );
                 return;
             }
-            if ( ttgo->power->isTimerTimeoutIRQ() ) {
+            if ( watch.isGaugeWdtTimeoutIrq() ) {
                 /*
                 * clear pmu timer and IRQ state
                 * set an silence wakeup request
@@ -606,7 +606,7 @@ void pmu_loop( void ) {
                 */
                 ttgo->power->clearTimerStatus();
                 ttgo->power->offTimer();
-                ttgo->power->clearIRQ();
+                watch.clearIrqStatus();
                 log_d("AXP202: TimerTimeoutIRQ");
                 powermgm_set_event( POWERMGM_SILENCE_WAKEUP_REQUEST );
                 pmu_send_cb( PMUCTL_TIMER_TIMEOUT, NULL );
@@ -616,7 +616,7 @@ void pmu_loop( void ) {
             * clear IRQ
             * set update flag
             */
-            ttgo->power->clearIRQ();
+            watch.clearIrqStatus();
             pmu_update = true;
         }
     #elif  defined( LILYGO_WATCH_2021 ) 
@@ -728,9 +728,11 @@ void pmu_shutdown( void ) {
         M5.disableMainPower();
     #elif defined( M5CORE2 )
         M5.shutdown();
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) 
         TTGOClass *ttgo = TTGOClass::getWatch();
         ttgo->power->shutdown();
+    #elif defined( LILYGO_WATCH_2020_S3 )
+        watch.shutdown();
     #endif
 #endif
 }
