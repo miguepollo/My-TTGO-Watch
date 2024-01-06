@@ -1077,7 +1077,7 @@ int32_t pmu_get_battery_percent( void ) {
                 if( tmp_percent )
                     percent = tmp_percent;
             }
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
 
             if ( ttgo->power->getBattChargeCoulomb() < ttgo->power->getBattDischargeCoulomb() || ttgo->power->getBattVoltage() < 3200 ) {
@@ -1099,6 +1099,17 @@ int32_t pmu_get_battery_percent( void ) {
                 percent = tmp_percent;
         #elif defined( WT32_SC01 )
             percent = 100;
+        #elif defined( LILYGO_WATCH_2020_S3 )
+            if ( ttgo->power->getBattChargeCoulomb() < ttgo->power->getBattDischargeCoulomb() || watch.getBattVoltage() < 3200 ) {
+                ttgo->power->ClearCoulombcounter();
+            }
+
+            if ( pmu_get_calculated_percent() ) {
+                percent = ( ttgo->power->getCoulombData() / pmu_config.designed_battery_cap ) * 100;
+            }
+            else {
+                percent = watch.getBatteryPercent();
+            }
         #endif
     #endif
     return( percent );
@@ -1153,9 +1164,11 @@ float pmu_get_battery_voltage( void ) {
             voltage = M5.getBatteryVoltage();
         #elif defined( M5CORE2 )
             voltage = M5.Axp.GetBatVoltage() * 1000.0;
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             voltage = ttgo->power->getBattVoltage();
+        #elif defined( LILYGO_WATCH_2020_S3 )
+            voltage = watch.getBattVoltage();
         #elif defined( LILYGO_WATCH_2021 )
             uint16_t battery = 0;
             uint16_t count = 10;
@@ -1274,9 +1287,11 @@ float pmu_get_battery_charge_current( void ) {
         #if defined( M5PAPER )
         #elif defined( M5CORE2 )
             current = M5.Axp.GetBatChargeCurrent();
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             current = ttgo->power->getBattChargeCurrent();
+        #elif defined( LILYGO_WATCH_2020_S3 )
+            current = watch.getChargerConstantCurr();
         #elif defined( LILYGO_WATCH_2021 )
         #elif defined( WT32_SC01 )
         #endif
