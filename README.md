@@ -1,3 +1,4 @@
+![license](https://img.shields.io/github/license/miguepollo/My-TTGO-Watch?style=for-the-badge)
 ![Last commit](https://img.shields.io/github/last-commit/miguepollo/My-TTGO-Watch?style=for-the-badge)
 ![activity](https://img.shields.io/github/commit-activity/m/miguepollo/My-TTGO-Watch?style=for-the-badge)
 ![github stars](https://img.shields.io/github/stars/miguepollo/My-TTGO-Watch?style=for-the-badge)
