@@ -1,8 +1,6 @@
-<p align="center">
-<img src="https://img.shields.io/github/last-commit/miguepollo/My-TTGO-Watch.svg?style=for-the-badge" />
-&nbsp;
-</p>
-<hr/>
+![Last commit](https://img.shields.io/github/last-commit/miguepollo/My-TTGO-Watch?style=for-the-badge)
+![activity](https://img.shields.io/github/commit-activity/m/miguepollo/My-TTGO-Watch?style=for-the-badge)
+![github stars](https://img.shields.io/github/stars/miguepollo/My-TTGO-Watch?style=for-the-badge)
 
 # My-TTGO-Watch
 
