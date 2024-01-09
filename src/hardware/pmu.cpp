@@ -1311,8 +1311,10 @@ float pmu_get_battery_discharge_current( void ) {
             current = M5.Axp.GetBatCurrent();
             if( current < 0.0f )
                 current = current * -1.0f;
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
+            current = ttgo->power->getBattDischargeCurrent();
+        #elif defined( LILYGO_WATCH_2020_S3 )
             current = ttgo->power->getBattDischargeCurrent();
         #elif defined( LILYGO_WATCH_2021 )
         #elif defined( WT32_SC01 )
@@ -1334,9 +1336,11 @@ float pmu_get_vbus_voltage( void ) {
             while( voltage == 0.0 ) {
                 voltage = M5.Axp.GetVBusVoltage() * 1000.0;
             }
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             voltage = ttgo->power->getVbusVoltage();
+        #elif defined( LILYGO_WATCH_2020_S3 )
+            voltage = watch.getVbusVoltage();
         #elif defined( LILYGO_WATCH_2021 )
         #elif defined( WT32_SC01 )
             voltage = 5.0f;
@@ -1375,9 +1379,11 @@ bool pmu_is_charging( void ) {
         #if defined( M5PAPER )
         #elif defined( M5CORE2 )
             charging = M5.Axp.isCharging();
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             charging = ttgo->power->isChargeing();
+        #elif defined( LILYGO_WATCH_2020_S3 )
+            charging = watch.isCharging();
         #elif defined( LILYGO_WATCH_2021 )
             charging = digitalRead( CHARGE ) ? false : true;
         #elif defined( WT32_SC01 )
@@ -1397,9 +1403,11 @@ bool pmu_is_vbus_plug( void ) {
         #if defined( M5PAPER )
         #elif defined( M5CORE2 )
             plug = M5.Axp.isACIN();
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             plug = ttgo->power->isVBUSPlug();
+        #elif defined( LILYGO_WATCH_2020_S3 )
+            plug = watch.isVBUSPlug();
         #elif defined( LILYGO_WATCH_2021 )
             if( pmu_get_battery_voltage() > 4300 )
                 plug = true;
