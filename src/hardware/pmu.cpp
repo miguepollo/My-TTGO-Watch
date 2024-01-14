@@ -817,11 +817,11 @@ void pmu_standby( void ) {
             */
         if ( pmu_get_silence_wakeup() ) {
             if ( watch.isCharging() || watch.isVbusIn() ) {
-                ttgo->power->setTimer( pmu_config.silence_wakeup_interval_vbplug );
+                watch.setCountdownTimer( pmu_config.silence_wakeup_interval_vbplug );
                 log_d("enable silence wakeup timer, %dmin", pmu_config.silence_wakeup_interval_vbplug );
             }
             else {
-                ttgo->power->setTimer( pmu_config.silence_wakeup_interval );
+                watch.setCountdownTimer( pmu_config.silence_wakeup_interval );
                 log_d("enable silence wakeup timer, %dmin", pmu_config.silence_wakeup_interval );
             }
         }
@@ -921,8 +921,8 @@ void pmu_wakeup( void ) {
         /*
         * clear timer
         */
-        ttgo->power->clearTimerStatus();
-        ttgo->power->offTimer();
+        watch.clearCountdownTimer();
+        watch.disableCountdownTimer();
         /*
         * enable LDO2, backlight?
         */
