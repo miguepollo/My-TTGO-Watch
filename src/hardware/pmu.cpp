@@ -924,11 +924,11 @@ void pmu_wakeup( void ) {
         watch.clearCountdownTimer();
         watch.disableCountdownTimer();
         /*
-        * enable LDO2, backlight?
+        * enable LDO2, backlight
         */
-
+        watch.enableALDO2();
         /*
-         * disable LD02, sound?
+         * disable LD02, sound
          */
         ttgo->power->setPowerOutPut( AXP202_LDO2, AXP202_ON );    
     #elif  defined( LILYGO_WATCH_2021 )
