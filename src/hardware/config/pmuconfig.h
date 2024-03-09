@@ -68,8 +68,8 @@
         public:
         pmu_config_t();
         int32_t designed_battery_cap = 300;
-        int32_t silence_wakeup_interval = SILENCEWAKEINTERVAL;
-        int32_t silence_wakeup_interval_vbplug = SILENCEWAKEINTERVAL_PLUG;
+        int8_t silence_wakeup_interval = SILENCEWAKEINTERVAL;
+        int8_t silence_wakeup_interval_vbplug = SILENCEWAKEINTERVAL_PLUG;
         int32_t normal_voltage = NORMALVOLTAGE;
         int32_t normal_power_save_voltage = NORMALPOWERSAVEVOLTAGE;
         int32_t experimental_normal_voltage = EXPERIMENTALNORMALVOLTAGE;
