@@ -1,3 +1,4 @@
+
 /****************************************************************************
               config.h
     Tu May 22 21:23:51 2020
@@ -57,6 +58,8 @@
         #elif defined( LILYGO_WATCH_2020_S3 )
             #undef LILYGO_WATCH_LVGL
             #define HARDWARE_NAME   "T-Watch2020S3"
+            #define AXP2101_ON 1
+            #define AXP2101_OFF 0
             #define RES_X_MAX       240
             #define RES_Y_MAX       240
             #define USE_PSRAM_ALLOC_LVGL                    /** @brief enabled LVGL to use PSRAM */ 
@@ -115,6 +118,8 @@
                 #include <../include/twatch2020s3/Setup212_LilyGo_T_Watch_S3.h>
                 #include <../lib/twatch2020s3/utilities.h>
                 #include <LilyGoLib.h>
+                #include <FT6336U.h>
+                #include <focaltech.h>
                 extern LilyGoLib watch;
             #endif
         #endif
