@@ -27,6 +27,7 @@
 #include "touch.h"
 #include "powermgm.h"
 #include "callback.h"
+#include "FT6336U.h"
 
 #include "utils/alloc.h"
 
@@ -42,7 +43,9 @@ touch_config_t touch_config;
         #include <M5EPD.h>
     #elif defined( M5CORE2 )
         #include <M5Core2.h>
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+    #elif defined( LILYGO_WATCH_2020_S3 )
+        #include <LilyGoLib.h>
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) 
         #include <TTGO.h>
     #elif defined( LILYGO_WATCH_2021 )    
         #include <Wire.h>
@@ -60,7 +63,7 @@ touch_config_t touch_config;
     volatile bool DRAM_ATTR touch_irq_flag = false;
     portMUX_TYPE DRAM_ATTR Touch_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
     void IRAM_ATTR touch_irq( void );
-
+    TouchDrvFT6X36 touch2;
     void IRAM_ATTR touch_irq( void ) {
         /*
         * enter critical section and set interrupt flag
@@ -113,7 +116,33 @@ void touch_setup( void ) {
         M5.Touch.begin();
         pinMode( GPIO_NUM_39, INPUT );
         attachInterrupt( GPIO_NUM_39, &touch_irq, FALLING );
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+    #elif defined( LILYGO_WATCH_2020_S3 )
+        /*
+        * reset/wakeup touch controller
+        */
+    /*
+        * This changes to polling mode.
+        * The touch sensor holds the line low for the duration of the touch.
+        * The level change can still trigger an interrupt, which we
+        * use to start polling, and we don't stop polling till the level is high again.
+        */
+        touch2.enableAutoCalibration();
+        detachInterrupt( BOARD_TOUCH_INT );
+        /*
+        * This doesn't appear to change anything,
+        * the sensor doesn't automatically switch to monitor mode till after 30 seconds
+        */
+        touch2.setMonitorTime(0x01);
+        /*
+        * This is supposed to control how often the sensor checks for touch while in monitor mode
+        * The units is ms between checks, so 250 checks only 4 times a second. 
+        */
+//        ttgo->touch->setMonitorPeriod(125);
+        /*
+        * create semaphore and register interrupt function
+        */
+        attachInterrupt( BOARD_TOUCH_INT, &touch_irq, GPIO_INTR_NEGEDGE );
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )  
         TTGOClass *ttgo = TTGOClass::getWatch();
         /*
         * reset/wakeup touch controller
@@ -313,7 +342,35 @@ bool touch_powermgm_event_cb( EventBits_t event, void *arg ) {
                                                 retval = true;
                                                 break;
             }
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+        #elif defined( LILYGO_WATCH_2020_S3 )
+            switch( event ) {
+                case POWERMGM_STANDBY:          log_d("go standby");
+                                                if ( touch_lock_take() ) {
+                                                    touch2.sleep();
+                                                    touch_lock_give();
+                                                }
+                                                retval = true;
+                                                break;
+                case POWERMGM_WAKEUP:           log_d("go wakeup");
+                                                if ( touch_lock_take() ) {
+                                                    touch2.wakeup();
+                                                    touch_lock_give();
+                                                }
+                                                retval = true;
+                                                break;
+                case POWERMGM_SILENCE_WAKEUP:   log_d("go silence wakeup");
+                                                retval = true;
+                                                break;
+                case POWERMGM_ENABLE_INTERRUPTS:
+                                                attachInterrupt( BOARD_TOUCH_INT, &touch_irq, FALLING );
+                                                retval = true;
+                                                break;
+                case POWERMGM_DISABLE_INTERRUPTS:
+                                                detachInterrupt( BOARD_TOUCH_INT );
+                                                retval = true;
+                                                break;
+            }
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) 
             TTGOClass *ttgo = TTGOClass::getWatch();
             switch( event ) {
                 case POWERMGM_STANDBY:          log_d("go standby");
@@ -410,7 +467,38 @@ bool touch_getXY( int16_t &x, int16_t &y ) {
                 touched = false;
                 return( false );
             }
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+        #elif defined( LILYGO_WATCH_2020_S3 )
+            static bool touch_press = false;
+
+                // disable touch when we are in standby or silence wakeup
+            if ( powermgm_get_event( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP ) ) {
+                return( false );
+            }
+            /*
+            * get touchstate from touchcontroller if not taken
+            * by other task/thread
+            */
+            bool getTouchResult = false;
+            if ( touch_lock_take() ) {
+                getTouchResult = watch.getTouched();
+                touch_lock_give();
+            }
+            /*
+            * if touched?
+            */
+            if ( !getTouchResult ) {
+                touch_press = false;
+                return( false );
+            }
+            /*
+            * wibe if touched
+            */
+            if ( !touch_press ) {
+                touch_press = true;
+                if ( display_get_vibe() )
+                    motor_vibe( 3 );
+            }
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) 
             TTGOClass *ttgo = TTGOClass::getWatch();
             static bool touch_press = false;
 
@@ -513,8 +601,7 @@ static bool touch_read(lv_indev_drv_t * drv, lv_indev_data_t*data) {
             else {
                 data->state = LV_INDEV_STATE_REL;
             }
-
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+        #elif defined( LILYGO_WATCH_2020_S3 )
             /*
             * We use two flags, one changes in the interrupt handler
             * the other controls whether we poll the sensor,
@@ -531,8 +618,59 @@ static bool touch_read(lv_indev_drv_t * drv, lv_indev_data_t*data) {
              */
             GesTrue_t gesture = FOCALTECH_NO_GESTRUE;
             if ( touch_lock_take() ) {
-                TTGOClass::getWatch()->touchToMonitor();
-                gesture = TTGOClass::getWatch()->touch->getGesture();
+//                TTGOClass::getWatch()->touchToMonitor();
+                gesture = watch.getGesture();
+                touch_lock_give();
+            }
+            /*
+             * check touch event
+             */
+            switch( gesture ) {
+                case FOCALTECH_MOVE_UP:
+                    break;
+                case FOCALTECH_MOVE_LEFT:
+                    break;
+                case FOCALTECH_MOVE_DOWN:
+                    break;
+                case FOCALTECH_MOVE_RIGHT:
+                    break;
+                case FOCALTECH_ZOOM_IN:
+                    break;
+                case FOCALTECH_ZOOM_OUT:
+                    break;
+                default:
+                    data->state = touch_getXY( data->point.x, data->point.y ) ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
+                    touched = digitalRead( BOARD_TOUCH_INT ) == LOW;
+                    if ( !touched ) {
+                        /*
+                        * Save power by switching to monitor mode now instead of waiting for 30 seconds.
+                        */
+                        if ( touch_lock_take() ) {
+//                            TTGOClass::getWatch()->touchToMonitor();
+                            touch_lock_give();
+                        }
+                    }
+                    break;
+            }
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) 
+            /*
+            * We use two flags, one changes in the interrupt handler
+            * the other controls whether we poll the sensor,
+            * and gets cleared when the level is no longer low,
+            * meaning the touch has finished
+            */
+            portENTER_CRITICAL( &Touch_IRQ_Mux );
+            bool temp_touch_irq_flag = touch_irq_flag;
+            touch_irq_flag = false;
+            portEXIT_CRITICAL( &Touch_IRQ_Mux );
+            touched |= temp_touch_irq_flag;
+            /*
+             * get touch event
+             */
+            GesTrue_t gesture = FOCALTECH_NO_GESTRUE;
+            if ( touch_lock_take() ) {
+//                TTGOClass::getWatch()->touchToMonitor();
+                gesture = watch.getGesture();
                 touch_lock_give();
             }
             /*

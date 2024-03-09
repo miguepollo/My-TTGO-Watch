@@ -36,12 +36,13 @@
         #include <M5Core2.h>
 
         SPIClass *sdhander = nullptr;
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) 
         #include <TTGO.h>
         
         #if defined( LILYGO_WATCH_HAS_SDCARD )
             SPIClass *sdhander = nullptr;
         #endif
+    #elif defined( LILYGO_WATCH_2020_S3 )
     #elif defined( LILYGO_WATCH_2021 )   
     #elif defined( WT32_SC01 )
     #else

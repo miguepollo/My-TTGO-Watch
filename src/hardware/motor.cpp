@@ -23,6 +23,7 @@
 #include "motor.h"
 #include "powermgm.h"
 #include "hardware/config/motorconfig.h"
+#include "../lib/twatch2020s3/utilities.h"
 
 #ifdef NATIVE_64BIT
 
@@ -86,13 +87,13 @@
                     * decrement timer counter and enable motor
                     */
                     motor_run_time_counter--;       
-                    digitalWrite(MOTOR_PIN, HIGH );
+                    digitalWrite(MOTOR_PIN2, HIGH );
                 }
                 else {
                     /*
                     * disable motor
                     */
-                    digitalWrite(MOTOR_PIN, LOW );              
+                    digitalWrite(MOTOR_PIN2, LOW );              
                 }
                 /*
                 * leave critical section
@@ -184,8 +185,14 @@ void motor_setup( void ) {
                 log_e("Motor init: I2C device not found, error %d", err);
                 drv = NULL;    
             }     
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2021 ) || defined( LILYGO_WATCH_2020_S3 ) 
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2021 ) 
             pinMode(MOTOR_PIN, OUTPUT);
+            timer = timerBegin(0, 80, true);
+            timerAttachInterrupt(timer, &onTimer, true);
+            timerAlarmWrite(timer, 10000, true);
+            timerAlarmEnable(timer);
+        #elif defined( LILYGO_WATCH_2020_S3 )
+            pinMode(MOTOR_PIN2, OUTPUT);
             timer = timerBegin(0, 80, true);
             timerAttachInterrupt(timer, &onTimer, true);
             timerAlarmWrite(timer, 10000, true);
@@ -214,7 +221,27 @@ bool motor_powermgm_event_cb( EventBits_t event, void *arg ) {
     #else
         #if defined( M5PAPER )
         #elif defined( LILYGO_WATCH_2020_V2 )
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2021 ) || defined( LILYGO_WATCH_2020_S3 )
+        #elif defined( LilYGO_WATCH_2020_S3 )
+            switch( event ) {
+                            case POWERMGM_SILENCE_WAKEUP:   portENTER_CRITICAL(&timerMux);
+                                                            motor_run_time_counter = 0;
+                                                            digitalWrite(MOTOR_PIN2, LOW );   
+                                                            portEXIT_CRITICAL(&timerMux);
+                                                            break;
+                            case POWERMGM_STANDBY:          portENTER_CRITICAL(&timerMux);
+                                                            motor_run_time_counter = 0;
+                                                            digitalWrite(MOTOR_PIN2, LOW );
+                                                            portEXIT_CRITICAL(&timerMux);
+                                                            break;
+                            case POWERMGM_ENABLE_INTERRUPTS:
+                                                            timerAttachInterrupt(timer, &onTimer, true);
+                                                            break;
+                            case POWERMGM_DISABLE_INTERRUPTS:
+                                                            timerDetachInterrupt(timer);
+                                                            break;
+                        }
+
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2021 ) 
             switch( event ) {
                 case POWERMGM_SILENCE_WAKEUP:   portENTER_CRITICAL(&timerMux);
                                                 motor_run_time_counter = 0;

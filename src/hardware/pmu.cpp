@@ -27,6 +27,15 @@
 #include "utils/alloc.h"
 #include "utils/filepath_convert.h"
 
+
+//! Error Code
+#define AXP_PASS            (0)
+#define AXP_FAIL            (-1)
+#define AXP_INVALID         (-2)
+#define AXP_NOT_INIT        (-3)
+#define AXP_NOT_SUPPORT     (-4)
+#define AXP_ARG_INVALID     (-5)
+
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
     #include "utils/millis.h"
@@ -75,6 +84,9 @@
 
 callback_t *pmu_callback = NULL;
 pmu_config_t pmu_config;
+
+XPowersAXP2101 pmu;
+SensorPCF8563 rtc;
 
 static int32_t pmu_get_voltage2percent( float mV );
 bool pmu_powermgm_event_cb( EventBits_t event, void *arg );
@@ -165,75 +177,7 @@ void pmu_setup( void ) {
         pinMode( AXP202_INT, INPUT );
         attachInterrupt( AXP202_INT, &pmu_irq, FALLING );
     #elif defined( LILYGO_WATCH_2020_S3 )
-        #define XPOWERS_CHIP_AXP2101
-        #include "XPowersLib.h"
-        XPowersAXP2101 pmu;
-        bool result = pmu.begin(Wire, AXP2101_SLAVE_ADDRESS, BOARD_I2C_SDA, BOARD_I2C_SCL);
-        if (result == false) {
-            Serial.println("PMU is not online..."); while (1)delay(50);
-        }
-        Serial.printf("getID:0x%x\n", pmu.getChipID());
-
-
-        /**
-         * if ADC sampling rate != 200, init charging current, samplingrate and coulomcounter
-         */
-        log_i("Init AXP2101 pmu controller");
-/*       if( pmu.getAdcSamplingRate() != 200 ) {
-            int failCounter = 0;
-            log_i("init AXP charging settings and control to 200Hz, 300mA, Coulomcounter");
-
-           if ( pmu.setChargerConstantCurr( 300 ) != AXP_PASS ) {
-                log_e("charge current set failed!");
-                failCounter++;
-            }
-
-            if ( pmu.EnableCoulombcounter() != AXP_PASS ) {
-                log_e("enable coulomb counter failed!");
-                failCounter++;
-            }
-
-            if ( pmu.setAdcSamplingRate( AXP_ADC_SAMPLING_RATE_200HZ ) != AXP_PASS ) {
-                log_e("adc sample set failed!");
-                failCounter++;
-            }
-
-            if ( failCounter ) {
-                log_e("AXP2101 setup failed, shutdown");
-                pmu.shutdown();
-            }
-        }
-        /*
-         * Turn on the IRQ used
-         */
-        /*
-        ttgo->power->adc1Enable( AXP202_BATT_VOL_ADC1 | AXP202_BATT_CUR_ADC1 | AXP202_VBUS_VOL_ADC1 | AXP202_VBUS_CUR_ADC1, AXP202_ON);
-        ttgo->power->enableIRQ( AXP202_VBUS_REMOVED_IRQ | AXP202_VBUS_CONNECT_IRQ
-                                | AXP202_CHARGING_FINISHED_IRQ | AXP202_CHARGING_IRQ
-                                | AXP202_TIMER_TIMEOUT_IRQ
-                                | AXP202_BATT_REMOVED_IRQ | AXP202_BATT_CONNECT_IRQ
-                                , AXP202_ON );
-        ttgo->power->clearIRQ();
-
-        if ( pmu_config.high_charging_target_voltage ) {
-            log_d("set target voltage to 4.36V");
-            if ( pmu.setChargeTargetVoltage(4.36) )
-                log_e("target voltage 4.36V set failed!");
-        }
-        else {
-            log_d("set target voltage to 4.2V");
-            if (pmu.setChargeTargetVoltage(4.2 ))
-                log_e("target voltage 4.2V set failed!");
-        }
-
-        ttgo->power->setPowerOutPut( AXP202_EXTEN, AXP212_OFF );
-        ttgo->power->setPowerOutPut( AXP202_DCDC2, AXP202_OFF );
-        ttgo->power->setPowerOutPut( AXP202_LDO4, AXP2101_OFF );
-        /*
-        * register IRQ function and GPIO pin
-        */
-        pinMode( BOARD_PMU_INT, INPUT );
-        attachInterrupt( BOARD_PMU_INT, &pmu_irq, FALLING );
+        watch.beginPower();
 
     #elif defined( LILYGO_WATCH_2021 )    
         pinMode( PWR_ON, OUTPUT );
@@ -290,11 +234,11 @@ bool pmu_powermgm_event_cb( EventBits_t event, void *arg ) {
                                                 break;
             #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
                 case POWERMGM_ENABLE_INTERRUPTS:
-                                                attachInterrupt( AXP202_INT, &pmu_irq, FALLING );
+                                                attachInterrupt( BOARD_PMU_INT, &pmu_irq, FALLING );
                                                 retval = true;
                                                 break;
                 case POWERMGM_DISABLE_INTERRUPTS:
-                                                detachInterrupt( AXP202_INT );
+                                                detachInterrupt( BOARD_PMU_INT );
                                                 retval = true;
                                                 break;
             #endif
@@ -580,7 +524,7 @@ void pmu_loop( void ) {
                 * send PMUCTL_SHORT_PRESS event
                 * fast return for faster wakeup
                 */
-                watch.clearIrqStatus();
+                pmu.clearIrqStatus();
                 log_d("AXP202: PEKShortPressIRQ");
                 pmu_send_cb( PMUCTL_SHORT_PRESS, NULL );
                 return;
@@ -592,7 +536,7 @@ void pmu_loop( void ) {
                 * send PMUCTL_LONG_PRESS event
                 * fast return for faster wakeup
                 */
-                watch.clearIrqStatus();
+                pmu.clearIrqStatus();
                 log_d("AXP202: PEKLongtPressIRQ");
                 pmu_send_cb( PMUCTL_LONG_PRESS, NULL );
                 return;
@@ -604,9 +548,9 @@ void pmu_loop( void ) {
                 * send PMUCTL_LONG_PRESS event
                 * fast return for faster wakeup
                 */
-                ttgo->power->clearTimerStatus();
-                ttgo->power->offTimer();
-                watch.clearIrqStatus();
+//                ttgo->power->clearTimerStatus();
+//                ttgo->power->offTimer();
+                pmu.clearIrqStatus();
                 log_d("AXP202: TimerTimeoutIRQ");
                 powermgm_set_event( POWERMGM_SILENCE_WAKEUP_REQUEST );
                 pmu_send_cb( PMUCTL_TIMER_TIMEOUT, NULL );
@@ -616,7 +560,7 @@ void pmu_loop( void ) {
             * clear IRQ
             * set update flag
             */
-            watch.clearIrqStatus();
+            pmu.clearIrqStatus();
             pmu_update = true;
         }
     #elif  defined( LILYGO_WATCH_2021 ) 
@@ -811,17 +755,17 @@ void pmu_standby( void ) {
         esp_sleep_enable_gpio_wakeup ();
     #elif defined( LILYGO_WATCH_2020_S3 )
 
-        ttgo->power->clearTimerStatus();
+        rtc.clearCountdownTimer();
         /*
             * if silence wakeup enabled set the wakeup timer, depending on vplug
             */
         if ( pmu_get_silence_wakeup() ) {
             if ( watch.isCharging() || watch.isVbusIn() ) {
-                watch.setCountdownTimer( pmu_config.silence_wakeup_interval_vbplug );
+                rtc.setCountdownTimer( pmu_config.silence_wakeup_interval_vbplug,  pmu_config.silence_wakeup_interval);
                 log_d("enable silence wakeup timer, %dmin", pmu_config.silence_wakeup_interval_vbplug );
             }
             else {
-                watch.setCountdownTimer( pmu_config.silence_wakeup_interval );
+                rtc.setCountdownTimer( pmu_config.silence_wakeup_interval, pmu_config.silence_wakeup_interval );
                 log_d("enable silence wakeup timer, %dmin", pmu_config.silence_wakeup_interval );
             }
         }
@@ -840,13 +784,13 @@ void pmu_standby( void ) {
             /*
                 * disable LD02, sound?
                 */
-            ttgo->power->setPowerOutPut( AXP202_LDO2, AXP202_OFF );
-        #endif
+    
         /*
          * enable GPIO in lightsleep for wakeup
          */
         gpio_wakeup_enable( (gpio_num_t)BOARD_PMU_INT, GPIO_INTR_LOW_LEVEL );
         esp_sleep_enable_gpio_wakeup ();
+        
     #elif  defined( LILYGO_WATCH_2021 )
         digitalWrite( PWR_ON, LOW );
     #endif
@@ -930,7 +874,7 @@ void pmu_wakeup( void ) {
         /*
          * disable LD02, sound
          */
-        ttgo->power->setPowerOutPut( AXP202_LDO2, AXP202_ON );    
+        watch.disableALDO2();  
     #elif  defined( LILYGO_WATCH_2021 )
         digitalWrite( PWR_ON, HIGH );
     #endif
@@ -1100,16 +1044,9 @@ int32_t pmu_get_battery_percent( void ) {
         #elif defined( WT32_SC01 )
             percent = 100;
         #elif defined( LILYGO_WATCH_2020_S3 )
-            if ( ttgo->power->getBattChargeCoulomb() < ttgo->power->getBattDischargeCoulomb() || watch.getBattVoltage() < 3200 ) {
-                ttgo->power->ClearCoulombcounter();
-            }
 
-            if ( pmu_get_calculated_percent() ) {
-                percent = ( ttgo->power->getCoulombData() / pmu_config.designed_battery_cap ) * 100;
-            }
-            else {
                 percent = watch.getBatteryPercent();
-            }
+
         #endif
     #endif
     return( percent );
@@ -1315,7 +1252,6 @@ float pmu_get_battery_discharge_current( void ) {
             TTGOClass *ttgo = TTGOClass::getWatch();
             current = ttgo->power->getBattDischargeCurrent();
         #elif defined( LILYGO_WATCH_2020_S3 )
-            current = ttgo->power->getBattDischargeCurrent();
         #elif defined( LILYGO_WATCH_2021 )
         #elif defined( WT32_SC01 )
         #endif
@@ -1359,9 +1295,10 @@ float pmu_get_coulumb_data( void ) {
         #if defined( M5PAPER )
         #elif defined( M5CORE2 )
             coulumb_data = M5.Axp.GetCoulombData();
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )  
             TTGOClass *ttgo = TTGOClass::getWatch();
             coulumb_data = ttgo->power->getCoulombData();
+        #elif defined( LILYGO_WATCH_2020_S3 )
         #elif defined( LILYGO_WATCH_2021 )
         #elif defined( WT32_SC01 )
         #endif
@@ -1407,7 +1344,7 @@ bool pmu_is_vbus_plug( void ) {
             TTGOClass *ttgo = TTGOClass::getWatch();
             plug = ttgo->power->isVBUSPlug();
         #elif defined( LILYGO_WATCH_2020_S3 )
-            plug = watch.isVBUSPlug();
+            plug = pmu.isVbusInsertOnSource();
         #elif defined( LILYGO_WATCH_2021 )
             if( pmu_get_battery_voltage() > 4300 )
                 plug = true;

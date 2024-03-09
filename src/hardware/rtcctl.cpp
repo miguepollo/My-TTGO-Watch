@@ -351,8 +351,10 @@ bool rtcctl_powermgm_event_cb( EventBits_t event, void *arg ) {
                                         #else
                                             #if defined( M5PAPER )
                                             #elif defined( M5CORE2 )
-                                            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+                                            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) 
                                                 attachInterrupt( RTC_INT_PIN, &rtcctl_irq, FALLING );
+                                            #elif defined( LILYGO_WATCH_2020_S3 )
+                                                attachInterrupt( BOARD_RTC_INT_PIN, &rtcctl_irq, FALLING );
                                             #elif defined( LILYGO_WATCH_2021 )
                                             #elif defined( WT32_SC01 )
                                             #else
@@ -366,8 +368,10 @@ bool rtcctl_powermgm_event_cb( EventBits_t event, void *arg ) {
                                         #else
                                             #if defined( M5PAPER )
                                             #elif defined( M5CORE2 )
-                                            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+                                            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) 
                                                 detachInterrupt( RTC_INT_PIN );
+                                            #elif defined( LILYGO_WATCH_2020_S3 )
+                                                detachInterrupt( BOARD_RTC_INT_PIN );
                                             #elif defined( LILYGO_WATCH_2021 )
                                             #elif defined( WT32_SC01 )
                                             #else

@@ -35,7 +35,26 @@
     * based on https://github.com/earlephilhower/ESP8266Audio
     */
     #if defined( M5PAPER )
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+    #elif defined( LILYGO_WATCH_2020_S3 )
+        #include "AudioFileSourceSPIFFS.h"
+        #include "AudioFileSourcePROGMEM.h"
+        #include "AudioFileSourceID3.h"
+        #include "AudioGeneratorMP3.h"
+        #include "AudioGeneratorWAV.h"
+        #include <AudioGeneratorMIDI.h>
+        #include "AudioOutputI2S.h"
+        #include <ESP8266SAM.h>
+        #include "pmu.h"
+
+        AudioFileSourceSPIFFS *spliffs_file;
+        AudioOutputI2S *out;
+        AudioFileSourceID3 *id3;
+        XPowersAXP2101 pmu;
+        AudioGeneratorMP3 *mp3;
+        AudioGeneratorWAV *wav;
+        ESP8266SAM *sam;
+        AudioFileSourcePROGMEM *progmem_file;
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )  
         #include "TTGO.h"
 
         #include "AudioFileSourceSPIFFS.h"
@@ -89,7 +108,7 @@ void sound_setup( void ) {
     #ifdef NATIVE_64BIT
 
     #else
-        #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+        #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 ) 
             /*
             * set sound chip voltage on V1
             */
@@ -119,6 +138,32 @@ void sound_setup( void ) {
             sound_send_event_cb( SOUNDCTL_VOLUME, (void *)&sound_config.volume );
 
             sound_init = true;
+        #elif defined( LILYGO_WATCH_2020_S3 )
+         /*
+            * set sound driver
+            */
+            /**
+             * set sound driver
+             */
+            out = new AudioOutputI2S();
+            out->SetPinout( BOARD_DAC_IIS_BCK, BOARD_DAC_IIS_WS, BOARD_DAC_IIS_DOUT );
+            sound_set_volume_config( sound_config.volume );
+            mp3 = new AudioGeneratorMP3();
+            wav = new AudioGeneratorWAV();
+            sam = new ESP8266SAM;
+            sam->SetVoice(sam->VOICE_SAM);
+            /*
+            * register all powermgm callback functions
+            */
+            powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, sound_powermgm_event_cb, "powermgm sound" );
+            powermgm_register_loop_cb( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP, sound_powermgm_loop_cb, "powermgm sound loop" );
+            sound_set_enabled( sound_config.enable );
+
+            sound_send_event_cb( SOUNDCTL_ENABLED, (void *)&sound_config.enable );
+            sound_send_event_cb( SOUNDCTL_VOLUME, (void *)&sound_config.volume );
+
+            sound_init = true;
+
         #else
             sound_set_enabled( false );
             sound_init = false;
@@ -247,9 +292,11 @@ void sound_set_enabled( bool enabled ) {
             #if     defined( LILYGO_WATCH_2020_V1 )
                     TTGOClass *ttgo = TTGOClass::getWatch();
                     ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_ON );
-            #elif   defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+            #elif   defined( LILYGO_WATCH_2020_V3 )  
                     TTGOClass *ttgo = TTGOClass::getWatch();
                     ttgo->power->setPowerOutPut( AXP202_LDO4, AXP202_ON );
+            #elif   defined( LILYGO_WATCH_2020_S3 )
+                    pmu.enablePowerOutput( XPOWERS_LDO4);
             #endif
             delay( 50 );
         }
@@ -264,9 +311,11 @@ void sound_set_enabled( bool enabled ) {
             #if     defined( LILYGO_WATCH_2020_V1 )
                     TTGOClass *ttgo = TTGOClass::getWatch();
                     ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_OFF );
-            #elif   defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2020_S3 )
+            #elif   defined( LILYGO_WATCH_2020_V3 ) 
                     TTGOClass *ttgo = TTGOClass::getWatch();
                     ttgo->power->setPowerOutPut( AXP202_LDO4, AXP202_OFF );
+            #elif   defined( LILYGO_WATCH_2020_S3 )
+                    pmu.disablePowerOutput( XPOWERS_LDO4);
             #endif
         }
     #endif
