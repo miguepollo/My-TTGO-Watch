@@ -121,6 +121,8 @@
                 #include <FT6336U.h>
                 #include <focaltech.h>
                 extern LilyGoLib watch;
+                extern XPowersAXP2101 pmu;
+                extern SensorPCF8563 rtc;
             #endif
         #endif
         #define _CONFIG_H 

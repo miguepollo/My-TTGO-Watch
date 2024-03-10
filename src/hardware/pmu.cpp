@@ -85,8 +85,6 @@
 callback_t *pmu_callback = NULL;
 pmu_config_t pmu_config;
 
-XPowersAXP2101 pmu;
-SensorPCF8563 rtc;
 
 static int32_t pmu_get_voltage2percent( float mV );
 bool pmu_powermgm_event_cb( EventBits_t event, void *arg );
@@ -178,7 +176,6 @@ void pmu_setup( void ) {
         attachInterrupt( AXP202_INT, &pmu_irq, FALLING );
     #elif defined( LILYGO_WATCH_2020_S3 )
         watch.beginPower();
-
     #elif defined( LILYGO_WATCH_2021 )    
         pinMode( PWR_ON, OUTPUT );
         digitalWrite( PWR_ON, HIGH );
@@ -524,7 +521,7 @@ void pmu_loop( void ) {
                 * send PMUCTL_SHORT_PRESS event
                 * fast return for faster wakeup
                 */
-                pmu.clearIrqStatus();
+                watch.clearPMU();       // clearIrqStatus();
                 log_d("AXP202: PEKShortPressIRQ");
                 pmu_send_cb( PMUCTL_SHORT_PRESS, NULL );
                 return;
@@ -536,7 +533,7 @@ void pmu_loop( void ) {
                 * send PMUCTL_LONG_PRESS event
                 * fast return for faster wakeup
                 */
-                pmu.clearIrqStatus();
+                watch.clearPMU();       // clearIrqStatus();
                 log_d("AXP202: PEKLongtPressIRQ");
                 pmu_send_cb( PMUCTL_LONG_PRESS, NULL );
                 return;
@@ -550,8 +547,8 @@ void pmu_loop( void ) {
                 */
 //                ttgo->power->clearTimerStatus();
 //                ttgo->power->offTimer();
-                pmu.clearIrqStatus();
-                log_d("AXP202: TimerTimeoutIRQ");
+                watch.clearPMU();       // clearIrqStatus();
+                log_d("AXP2101: TimerTimeoutIRQ");
                 powermgm_set_event( POWERMGM_SILENCE_WAKEUP_REQUEST );
                 pmu_send_cb( PMUCTL_TIMER_TIMEOUT, NULL );
                 return;
@@ -560,7 +557,7 @@ void pmu_loop( void ) {
             * clear IRQ
             * set update flag
             */
-            pmu.clearIrqStatus();
+            watch.clearPMU();       // pmu.clearIrqStatus();
             pmu_update = true;
         }
     #elif  defined( LILYGO_WATCH_2021 ) 
@@ -754,18 +751,17 @@ void pmu_standby( void ) {
         gpio_wakeup_enable( (gpio_num_t)AXP202_INT, GPIO_INTR_LOW_LEVEL );
         esp_sleep_enable_gpio_wakeup ();
     #elif defined( LILYGO_WATCH_2020_S3 )
-
-        rtc.clearCountdownTimer();
+        watch.clearCountdownTimer();
         /*
             * if silence wakeup enabled set the wakeup timer, depending on vplug
             */
         if ( pmu_get_silence_wakeup() ) {
             if ( watch.isCharging() || watch.isVbusIn() ) {
-                rtc.setCountdownTimer( pmu_config.silence_wakeup_interval_vbplug,  pmu_config.silence_wakeup_interval);
+                watch.setCountdownTimer( pmu_config.silence_wakeup_interval_vbplug,  pmu_config.silence_wakeup_interval);
                 log_d("enable silence wakeup timer, %dmin", pmu_config.silence_wakeup_interval_vbplug );
             }
             else {
-                rtc.setCountdownTimer( pmu_config.silence_wakeup_interval, pmu_config.silence_wakeup_interval );
+                watch.setCountdownTimer( pmu_config.silence_wakeup_interval, pmu_config.silence_wakeup_interval );
                 log_d("enable silence wakeup timer, %dmin", pmu_config.silence_wakeup_interval );
             }
         }
@@ -1344,7 +1340,7 @@ bool pmu_is_vbus_plug( void ) {
             TTGOClass *ttgo = TTGOClass::getWatch();
             plug = ttgo->power->isVBUSPlug();
         #elif defined( LILYGO_WATCH_2020_S3 )
-            plug = pmu.isVbusInsertOnSource();
+            plug = watch.isVbusInsertOnSource();
         #elif defined( LILYGO_WATCH_2021 )
             if( pmu_get_battery_voltage() > 4300 )
                 plug = true;

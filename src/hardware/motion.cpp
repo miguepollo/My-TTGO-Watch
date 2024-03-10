@@ -39,6 +39,7 @@
 
     #elif defined( M5CORE2 )
 
+    #elif defined( LILYGO_WATCH_2020_S3 )
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #include <TTGO.h>
     #elif defined( LILYGO_WATCH_2021 )
@@ -51,15 +52,8 @@
             #include <sstream>
             #include <fstream>
             BMA423 bma;
-        #elif defined( LILYGO_WATCH_2020_S3 )
-            #include <Wire.h>
-            #include <SPI.h>
-            #include <LilyGoLib.h>
-            #include <sstream>
-            #include <fstream>
-            #include <bma423.h>
-            BMA423 bma;
-            SensorBMA423 bma;
+        
+
         #endif
 
         uint16_t readRegister(uint8_t address, uint8_t reg, uint8_t *data, uint16_t len) {

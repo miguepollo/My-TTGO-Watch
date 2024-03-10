@@ -49,7 +49,6 @@
         AudioFileSourceSPIFFS *spliffs_file;
         AudioOutputI2S *out;
         AudioFileSourceID3 *id3;
-        XPowersAXP2101 pmu;
         AudioGeneratorMP3 *mp3;
         AudioGeneratorWAV *wav;
         ESP8266SAM *sam;
@@ -296,7 +295,7 @@ void sound_set_enabled( bool enabled ) {
                     TTGOClass *ttgo = TTGOClass::getWatch();
                     ttgo->power->setPowerOutPut( AXP202_LDO4, AXP202_ON );
             #elif   defined( LILYGO_WATCH_2020_S3 )
-                    pmu.enablePowerOutput( XPOWERS_LDO4);
+                    watch.enablePowerOutput( XPOWERS_LDO4);
             #endif
             delay( 50 );
         }
@@ -315,7 +314,7 @@ void sound_set_enabled( bool enabled ) {
                     TTGOClass *ttgo = TTGOClass::getWatch();
                     ttgo->power->setPowerOutPut( AXP202_LDO4, AXP202_OFF );
             #elif   defined( LILYGO_WATCH_2020_S3 )
-                    pmu.disablePowerOutput( XPOWERS_LDO4);
+                    watch.disablePowerOutput( XPOWERS_LDO4);
             #endif
         }
     #endif
