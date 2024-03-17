@@ -113,10 +113,10 @@ void splash_screen_stage_one( void ) {
                 delay(5);
             }    
         #elif defined( LILYGO_WATCH_2020_S3 )
-            uint8_t zero = 0;
             watch.setBrightness(0);
             uint8_t target_brightness = display_get_brightness();
-            watch.incrementalBrightness(target_brightness, 5);      
+            log_i("target_brightness: %d", target_brightness);
+            watch.incrementalBrightness(target_brightness, 5);
         #endif
     #endif
 }
