@@ -168,9 +168,9 @@ void hardware_setup( void ) {
             ttgo->begin();
         #elif defined( LILYGO_WATCH_2020_S3 )
             /**
-             * lvgl init
+             * lv init
              */
-            lv_init();
+            lvgl_begin();
             /**
              * ttgo init
              */
