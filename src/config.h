@@ -119,6 +119,7 @@
                 #include <../lib/twatch2020s3/utilities.h>
                 #include <LilyGoLib.h>
                 #include <FT6336U.h>
+                #include <lv7_helper.h>
                 #include <focaltech.h>
                 extern LilyGoLib watch;
                 extern XPowersAXP2101 pmu;
