@@ -243,7 +243,9 @@ void powermgm_loop( void ) {
             #ifdef NATIVE_64BIT
 
             #else
+                log_i("antesdesetCpuFrequencyMhz");
                 setCpuFrequencyMhz( 80 );
+                log_i("despuesdesetCpuFrequencyMhz");
                 log_d("CPU speed = 80MHz, start light sleep");
                 /*
                 * from here, the consumption is round about 2.5mA
