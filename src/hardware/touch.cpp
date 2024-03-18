@@ -126,7 +126,7 @@ void touch_setup( void ) {
         * The level change can still trigger an interrupt, which we
         * use to start polling, and we don't stop polling till the level is high again.
         */
-        touch2.enableAutoCalibration();
+//        touch2.enableAutoCalibration();
         detachInterrupt( BOARD_TOUCH_INT );
         /*
         * This doesn't appear to change anything,
