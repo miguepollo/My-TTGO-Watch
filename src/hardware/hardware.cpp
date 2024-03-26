@@ -170,7 +170,7 @@ void hardware_setup( void ) {
             /**
              * lv init
              */
-            lvgl_begin();
+            lvgl_7helper.lvgl_begin();
             /**
              * ttgo init
              */
