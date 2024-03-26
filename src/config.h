@@ -58,6 +58,7 @@
         #elif defined( LILYGO_WATCH_2020_S3 )
             #undef LILYGO_WATCH_LVGL
             #define HARDWARE_NAME   "T-Watch2020S3"
+            #define LVGL_BUFFER_SIZE        (240*240)
             #define AXP2101_ON 1
             #define AXP2101_OFF 0
             #define RES_X_MAX       240
