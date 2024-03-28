@@ -168,13 +168,13 @@ void hardware_setup( void ) {
             ttgo->begin();
         #elif defined( LILYGO_WATCH_2020_S3 )
             /**
-             * lv init
-             */
-            lvgl_7helper.lvgl_begin();
-            /**
              * ttgo init
              */
             watch.begin();
+            /**
+             * lvgl helper
+             */
+            lvgl_begin();
         #elif defined( LILYGO_WATCH_2021 )
             /**
              * power all devices
