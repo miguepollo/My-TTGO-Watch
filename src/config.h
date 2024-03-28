@@ -121,8 +121,10 @@
                 #include <LilyGoLib.h>
                 #include <FT6336U.h>
                 #include <lv7_helper.h>
+                #include "gui/png_decoder/lv_png.h"
                 #include <focaltech.h>
                 extern LilyGoLib watch;
+                EventGroupHandle_t _tpEvent = xEventGroupCreate();
                 extern XPowersAXP2101 pmu;
                 extern SensorPCF8563 rtc;
             #endif
