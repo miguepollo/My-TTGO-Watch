@@ -123,10 +123,11 @@
                 #include <lv7_helper.h>
                 #include "gui/png_decoder/lv_png.h"
                 #include <focaltech.h>
+                #include <TFT_eSPI.h>
                 extern LilyGoLib watch;
                 EventGroupHandle_t _tpEvent = xEventGroupCreate();
                 extern XPowersAXP2101 pmu;
-                extern SensorPCF8563 rtc;
+                extern SensorPCF8563 rtc;               
             #endif
         #endif
         #define _CONFIG_H 
