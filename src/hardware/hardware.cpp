@@ -174,7 +174,7 @@ void hardware_setup( void ) {
             /**
              * lvgl helper
              */
-            lvgl_begin();
+            lvgl_7helper.lvgl_begin();
         #elif defined( LILYGO_WATCH_2021 )
             /**
              * power all devices
