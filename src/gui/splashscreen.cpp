@@ -21,6 +21,11 @@
  */
 #include "config.h"
 
+lv_obj_t *logo = NULL;
+lv_obj_t *preload = NULL;
+lv_obj_t *preload_label = NULL;
+lv_style_t style;
+
 #include "splashscreen.h"
 #include "hardware/display.h"
 #include "hardware/framebuffer.h"
@@ -42,14 +47,14 @@
     #endif
 #endif
 
-lv_obj_t *logo = NULL;
-lv_obj_t *preload = NULL;
-lv_obj_t *preload_label = NULL;
-lv_style_t style;
 
 LV_IMG_DECLARE(hedgehog);
 
 void splash_screen_stage_one( void ) {
+
+
+
+
 
     lv_split_jpeg_init();
     lv_png_init();
