@@ -120,6 +120,8 @@
                 #include <../lib/twatch2020s3/utilities.h>
                 #include <LilyGoLib.h>
                 #include <FT6336U.h>
+                #include <freertos/event_groups.h>
+                #include <freertos/FreeRTOS.h>
                 #include <lv7_helper.h>
                 #include "gui/png_decoder/lv_png.h"
                 #include <focaltech.h>
