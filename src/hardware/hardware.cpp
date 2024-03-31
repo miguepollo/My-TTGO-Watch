@@ -56,7 +56,7 @@
     #include "esp_bt.h"
     #include "esp_task_wdt.h"
     #include "lvgl.h"
-
+    
     #if defined( M5PAPER )
         #include <M5EPD.h>
     #elif defined( M5CORE2 )
@@ -74,7 +74,7 @@
         #error "no hardware init"
     #endif
 
-    Ticker *tickTicker = nullptr;
+    
 #endif
 
 void hardware_attach_lvgl_ticker( void ) {
@@ -174,8 +174,7 @@ void hardware_setup( void ) {
             /**
              * lvgl helper
              */
-            lvgl_7helper.lvgl_begin();
-            lvgl_7helper.setupTouch();
+            lvgl_begin();
         #elif defined( LILYGO_WATCH_2021 )
             /**
              * power all devices
@@ -230,6 +229,7 @@ void hardware_setup( void ) {
         /**
          * init lvgl ticker
          */    
+            
         tickTicker = new Ticker();
         hardware_attach_lvgl_ticker();
         /*
