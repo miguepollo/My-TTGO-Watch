@@ -24,7 +24,6 @@
 #ifndef _CONFIG_H
 
     #include "lvgl.h"
-    
 
     #ifdef NATIVE_64BIT
             #define RES_X_MAX       LV_HOR_RES_MAX
@@ -125,12 +124,14 @@
                 #include <lv7_helper.h>
                 #include "gui/png_decoder/lv_png.h"
                 #include <focaltech.h>
+                #include <Ticker.h>
                 #include <TFT_eSPI.h>
                 extern LilyGoLib watch;
-                EventGroupHandle_t _tpEvent = xEventGroupCreate();
                 extern XPowersAXP2101 pmu;
-                extern SensorPCF8563 rtc;               
+                extern SensorPCF8563 rtc;     
+                extern Ticker *tickTicker;          
             #endif
+        
         #endif
         #define _CONFIG_H 
     #endif
