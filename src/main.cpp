@@ -1,7 +1,7 @@
 #include "lvgl.h"
 #include "gui/gui.h"
 #include "gui/app.h"
-
+#include "Ticker.h"
 #include "hardware/hardware.h"
 #include "hardware/powermgm.h"
 
@@ -20,6 +20,7 @@
 #endif // NATIVE_64BIT
 
 void setup() {
+
     /**
      * hardware setup
      */
