@@ -128,7 +128,7 @@
                 #include <TFT_eSPI.h>
                 extern LilyGoLib watch;
                 extern XPowersAXP2101 pmu;
-                extern SensorPCF8563 rtc;     
+                extern SensorPCF8563 rtc;    
                 extern Ticker *tickTicker;          
             #endif
         
