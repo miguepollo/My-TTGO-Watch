@@ -13,7 +13,9 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <time.h>
-#include "sqlite3.h"
+#include <sqlite3.h>
+#include <Arduino.h>
+#include <esp_spi_flash.h>
 #include <sys/stat.h>
 #include <assert.h>
 #include <sys/types.h>
@@ -22,13 +24,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include "shox96_0_2.h"
-
-#ifdef NATIVE_64BIT
-
-#else
-    #include <Arduino.h>
-    #include <esp_spi_flash.h>
-#endif
 
 #undef dbg_printf
 //#define dbg_printf(...) Serial.printf(__VA_ARGS__)
@@ -181,12 +176,10 @@ static int ESP32Read(
     return rc;
   }
 
-  ofst = fseek(p->fp, iOfst, SEEK_SET); // lseek(p->fd, iOfst, SEEK_SET);
-  /*
-    if( ofst != 0 ){
-        return SQLITE_IOERR_READ;
-    }
-  */
+  ofst = fseek(p->fp, iOfst, SEEK_SET); //lseek(p->fd, iOfst, SEEK_SET);
+  //if( ofst != 0 ){
+  //  return SQLITE_IOERR_READ;
+  //}
   nRead = fread(zBuf, 1, iAmt, p->fp); // read(p->fd, zBuf, iAmt);
 
   if( nRead==iAmt ){
@@ -293,7 +286,7 @@ static int ESP32FileSize(sqlite3_file *pFile, sqlite_int64 *pSize){
       //Serial.println("fn: FileSize");
   ESP32File *p = (ESP32File*)pFile;
   int rc;                         /* Return code from fstat() call */
-//  struct stat sStat;              /* Output of fstat() call */
+  struct stat sStat;              /* Output of fstat() call */
 
   /* Flush the contents of the buffer to disk. As with the flush in the
   ** ESP32Read() method, it would be possible to avoid this and save a write
@@ -307,7 +300,7 @@ static int ESP32FileSize(sqlite3_file *pFile, sqlite_int64 *pSize){
 
 	struct stat st;
 	int fno = fileno(p->fp);
-	if (fno == -1)
+	if (fno < 0)
 		return SQLITE_IOERR_FSTAT;
 	if (fstat(fno, &st))
 		return SQLITE_IOERR_FSTAT;
@@ -390,6 +383,8 @@ static int ESP32Access(
   return SQLITE_OK;
 }
 
+static char dbrootpath[MAXPATHNAME+1];
+
 /*
 ** Open a file handle.
 */
@@ -417,15 +412,12 @@ static int ESP32Open(
   };
 
   ESP32File *p = (ESP32File*)pFile; /* Populate this structure */
-  // int oflags = 0;                 /* flags to pass to open() call */
+  int oflags = 0;                 /* flags to pass to open() call */
   char *aBuf = 0;
 	char mode[5];
       //Serial.println("fn: Open");
 
 	strcpy(mode, "r");
-  if( zName==0 ){
-    return SQLITE_IOERR;
-  }
 
   if( flags&SQLITE_OPEN_MAIN_JOURNAL ){
     aBuf = (char *)sqlite3_malloc(SQLITE_ESP32VFS_BUFFERSZ);
@@ -438,9 +430,9 @@ static int ESP32Open(
           || flags&SQLITE_OPEN_MAIN_JOURNAL ) {
     struct stat st;
     memset(&st, 0, sizeof(struct stat));
-    int rc = stat( zName, &st );
+    int rc = (zName == 0 ? -1 : stat( zName, &st ));
     //Serial.println(zName);
-		if (rc == -1) {
+		if (rc < 0) {
       strcpy(mode, "w+");
       //int fd = open(zName, (O_CREAT | O_RDWR | O_EXCL), S_IRUSR | S_IWUSR);
       //close(fd);
@@ -453,9 +445,41 @@ static int ESP32Open(
   memset(p, 0, sizeof(ESP32File));
   //p->fd = open(zName, oflags, 0600);
   //p->fd = open(zName, oflags, S_IRUSR | S_IWUSR);
-  p->fp = fopen(zName, mode);
-//  if( p->fp <= 0 ){
-  if( !p->fp ){
+  if (zName == 0) {
+    //generate a temporary file name
+    char *tName = tmpnam(NULL);
+    tName[4] = '_';
+    size_t len = strlen(dbrootpath);
+    memmove(tName + len, tName, strlen(tName) + 1);
+    memcpy(tName, dbrootpath, len);    
+    p->fp = fopen(tName, mode);
+    //https://stackoverflow.com/questions/64424287/how-to-delete-a-file-in-c-using-a-file-descriptor
+    //for temp file, then no need to handle in esp32close
+    unlink(tName);
+    //Serial.println("Temporary file name generated: " + String(tName) + " mode: " + String(mode));
+  } else {
+    //detect database root as folder for temporary files, every newly openened db will change this path
+    //this mainly fixes that vfs's have their own root name like /sd
+    char *ext = strrchr(zName, '.');
+    bool isdb = false;
+    if (ext) {
+      isdb = (strcmp(ext+1,"db") == 0);
+    }
+    if (isdb) {      
+      char zDir[MAXPATHNAME+1];
+      int i=0;
+      strcpy(zDir,zName);
+
+      for(i=1; zDir[i]!='/'; i++) {};
+      zDir[i] = '\0';
+
+      strcpy(dbrootpath, zDir);
+    }
+
+    p->fp = fopen(zName, mode);
+  }
+
+  if( p->fp == NULL){
     if (aBuf)
       sqlite3_free(aBuf);
     //Serial.println("Can't open");
@@ -497,8 +521,7 @@ static int ESP32Delete(sqlite3_vfs *pVfs, const char *zPath, int dirSync){
 
     /* Open a file-descriptor on the directory. Sync. Close. */
     dfd = fopen(zDir, "r");
-//    if( dfd<=0 ){
-    if( !dfd ){
+    if( dfd == (void *)NULL ){
       rc = -1;
     }else{
       rc = fflush(dfd);
@@ -656,7 +679,7 @@ static void shox96_0_2c(sqlite3_context *context, int argc, sqlite3_value **argv
 }
 
 static void shox96_0_2d(sqlite3_context *context, int argc, sqlite3_value **argv) {
-  unsigned int nIn, nOut;
+  unsigned int nIn, nOut, rc;
   const unsigned char *inBuf;
   unsigned char *outBuf;
   long int nOut2;
@@ -706,7 +729,7 @@ static void unishox1c(sqlite3_context *context, int argc, sqlite3_value **argv) 
 }
 
 static void unishox1d(sqlite3_context *context, int argc, sqlite3_value **argv) {
-  unsigned int nIn, nOut;
+  unsigned int nIn, nOut, rc;
   const unsigned char *inBuf;
   unsigned char *outBuf;
   long int nOut2;
