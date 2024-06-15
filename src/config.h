@@ -126,6 +126,8 @@
                 #include <focaltech.h>
                 #include <Ticker.h>
                 #include <TFT_eSPI.h>
+                #include <config_ext.h>
+                #include <sqlite3.h>
                 extern LilyGoLib watch;
                 extern XPowersAXP2101 pmu;
                 extern SensorPCF8563 rtc;    

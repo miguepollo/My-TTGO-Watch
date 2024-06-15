@@ -1,5 +1,4 @@
 #include "config.h"
-#include "utils/sqlite3/sqlite3.h"
 #include "utils/filepath_convert.h"
 #include "calendar_db.h"
 
