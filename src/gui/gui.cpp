@@ -123,53 +123,41 @@ bool gui_powermgm_event_cb( EventBits_t event, void *arg );
 bool gui_powermgm_loop_event_cb( EventBits_t event, void *arg );
 
 void gui_setup( void ) {
+    Serial.println("Iniciando gui_setup()");
+
     #ifdef NATIVE_64BIT
     #else
         xGUI_SemaphoreMutex = xSemaphoreCreateMutex();
     #endif
     gui_give();
     gui_take();
-    /**
-     * install lv fs spiffs wrapper
-     * files begin with "P:/foo.bar" -> "/spiffs/foo.bar"
-     */
+
+    Serial.println("Inicializando lv_fs_if_spiffs");
     lv_fs_if_spiffs_init();
-    /*
-     * Create an blank wallpaper
-     */
+
+    Serial.println("Creando wallpaper");
     img_bin = lv_img_create( lv_scr_act() , NULL );
     lv_obj_set_width( img_bin, lv_disp_get_hor_res( NULL ) );
     lv_obj_set_height( img_bin, lv_disp_get_ver_res( NULL ) );
     lv_obj_align( img_bin, NULL, LV_ALIGN_CENTER, 0, 0 );
 
-    log_i("mainbar setup");
+    Serial.println("Configurando mainbar");
     mainbar_setup();
-    /*
-     * add the four mainbar screens
-     */
-    log_i("mainbar tile setup");
+
+    Serial.println("Configurando tiles");
     main_tile_setup();
-    log_i("app tile setup");
     app_tile_setup();
-    log_i("note tile setup");
     note_tile_setup();
-    log_i("setup tile setup");
     setup_tile_setup();
-    /*
-     * add input and status
-     */
-    log_i("statusbar setup");
+
+    Serial.println("Configurando statusbar y quickbar");
     statusbar_setup();
-    log_i("quickbar setup");
     quickbar_setup();
-    log_i("keyboard setup");
     keyboard_setup();
-    log_i("num keyboard setup");
     num_keyboard_setup();
     gui_give();
-    /*
-     * add setup tool to the setup tile
-     */
+
+    Serial.println("Configurando setup tools");
     battery_settings_tile_setup();
     display_settings_tile_setup();
     move_settings_tile_setup();
@@ -201,6 +189,7 @@ void gui_setup( void ) {
     /*
      * register the main powermgm routine for the gui
      */
+    Serial.println("Registrando callbacks de powermgm");
     powermgm_register_cb_with_prio( POWERMGM_STANDBY, gui_powermgm_event_cb, "gui", CALL_CB_FIRST );
     powermgm_register_cb_with_prio( POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_event_cb, "gui", CALL_CB_LAST );
     powermgm_register_loop_cb( POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_loop_event_cb, "gui loop" );
@@ -222,6 +211,8 @@ void gui_setup( void ) {
     lv_img_set_src( watch2021_mask_bin, &rounddisplaymask_240px );
     lv_obj_align( watch2021_mask_bin, NULL, LV_ALIGN_CENTER, 0, 0 );
 #endif
+
+    Serial.println("gui_setup() completado");
 }
 
 bool gui_powermgm_lvgl_guard_take_cb( EventBits_t event, void *arg ) {

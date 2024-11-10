@@ -118,6 +118,8 @@ void hardware_detach_lvgl_ticker( void ) {
 }
 
 void hardware_setup( void ) {
+    Serial.println("Iniciando hardware_setup()");
+
     #ifdef NATIVE_64BIT
         /**
          * lvgl init
@@ -133,12 +135,14 @@ void hardware_setup( void ) {
         * Create an SDL thread to do this*/
         SDL_CreateThread( tick_thread, "tick", NULL );
     #else
+        Serial.println("Configurando pthread");
         esp_pthread_cfg_t cfg = esp_pthread_get_default_config();
         cfg.stack_size = ( 8 * 1024 );
         cfg.inherit_cfg = false;
         esp_pthread_set_cfg(&cfg);   
 
         #if defined( M5PAPER )
+            Serial.println("Iniciando M5Paper");
             /**
              * lvgl init
              */
@@ -148,6 +152,7 @@ void hardware_setup( void ) {
              */
             M5.begin();
         #elif defined( M5CORE2 )
+            Serial.println("Iniciando M5Core2");
             /**
              * LVGL init
              */
@@ -157,6 +162,7 @@ void hardware_setup( void ) {
              */
             M5.begin();
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) 
+            Serial.println("Iniciando LILYGO Watch");
             TTGOClass *ttgo = TTGOClass::getWatch();
             /**
              * lvgl init
@@ -167,15 +173,18 @@ void hardware_setup( void ) {
              */
             ttgo->begin();
         #elif defined( LILYGO_WATCH_2020_S3 )
+            Serial.println("Iniciando LILYGO Watch S3");
             /**
              * ttgo init
              */
             watch.begin();
+            Serial.println("LVGL inicializado");
             /**
              * lvgl helper
              */
             lvgl_begin();
         #elif defined( LILYGO_WATCH_2021 )
+            Serial.println("Iniciando LILYGO Watch 2021");
             /**
              * power all devices
              */
@@ -208,6 +217,7 @@ void hardware_setup( void ) {
 
             }
         #elif defined( WT32_SC01 )
+            Serial.println("Iniciando WT32 SC01");
             /**
              * lvgl init
              */
@@ -226,6 +236,7 @@ void hardware_setup( void ) {
                     log_i("I2C device at: 0x%02x", address );
             }
         #endif
+        Serial.println("Iniciando drivers");
         /**
          * init lvgl ticker
          */    
@@ -237,6 +248,8 @@ void hardware_setup( void ) {
         */
         SPIFFS.begin();
     #endif
+    Serial.println("hardware_setup() completado");
+
     /**
      * driver init
      */
