@@ -20,23 +20,29 @@
 #endif // NATIVE_64BIT
 
 void setup() {
-
-    /**
-     * hardware setup
-     */
+    Serial.begin(115200);
+    delay(1000);
+    Serial.println("Iniciando...");
+    Serial.println("Iniciando...");
+    Serial.printf("Heap libre: %d\n", ESP.getFreeHeap());
+    Serial.printf("PSRAM libre: %d\n", ESP.getFreePsram());
+    Serial.println("Configurando hardware...");
     hardware_setup();
-    /**
-     * gui setup
-     */
+    Serial.println("Hardware configurado");
+
+    Serial.println("Configurando GUI...");
     gui_setup();
-    /**
-     * apps autocall setup
-     */
+    Serial.println("GUI configurado");
+
+    Serial.println("Llamando a funciones de configuración de aplicaciones...");
     app_autocall_all_setup_functions();
-    /**
-     * post hardware setup
-     */
+    Serial.println("Funciones de configuración de aplicaciones llamadas");
+
+    Serial.println("Configuración post-hardware...");
     hardware_post_setup();
+    Serial.println("Configuración post-hardware completada");
+
+    Serial.println("Inicialización completa");
 }
 
 void loop(){
