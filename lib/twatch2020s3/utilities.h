@@ -1,5 +1,4 @@
 #pragma once
-
 #define BOARD_TFT_WIDTH             (240)
 #define BOARD_TFT_HEIHT             (240)
 
@@ -36,7 +35,7 @@
 #define BOARD_DAC_IIS_WS            (15)
 #define BOARD_DAC_IIS_DOUT          (46)
 
-// SX1262
+// SX1262 Radio Pins
 #define BOARD_RADIO_SCK              (3)
 #define BOARD_RADIO_MISO             (4)
 #define BOARD_RADIO_MOSI             (1)
@@ -44,11 +43,14 @@
 #define BOARD_RADIO_DI01             (9)
 #define BOARD_RADIO_RST              (8)
 #define BOARD_RADIO_BUSY             (7)
+#define BOARD_RADIO_DI03             (6)
 
 // PDM Microphone
 #define BOARD_MIC_DATA              (47)
 #define BOARD_MIC_CLOCK             (44)
 
+#define SHIELD_GPS_TX               (42)
+#define SHIELD_GPS_RX               (41)
 // Motor
 #define MOTOR_PIN2                  (4)
 
