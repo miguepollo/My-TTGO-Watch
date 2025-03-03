@@ -4,6 +4,12 @@
 #include "Ticker.h"
 #include "hardware/hardware.h"
 #include "hardware/powermgm.h"
+#include "TFT_eSPI.h"
+#include "SPI.h"
+
+
+TFT_eSPI tft = TFT_eSPI(); // Inicialización del TFT
+
 
 #if defined( NATIVE_64BIT )
     /**
