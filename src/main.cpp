@@ -1,4 +1,5 @@
 #include "lvgl.h"
+#include "Arduino.h"
 #include "gui/gui.h"
 #include "gui/app.h"
 #include "Ticker.h"

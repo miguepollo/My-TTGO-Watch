@@ -1,26 +1,4 @@
 
-/****************************************************************************
-              config.h
-    Tu May 22 21:23:51 2020
-    Copyright  2020  Dirk Brosswick
- *  Email: dirk.brosswick@googlemail.com
- ****************************************************************************/
- 
-/*
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- */
 #ifndef _CONFIG_H
 
     #include "lvgl.h"
@@ -117,6 +95,9 @@
             #elif defined( LILYGO_WATCH_2020_S3 )
                 #include <../include/twatch2020s3/Setup212_LilyGo_T_Watch_S3.h>
                 #include <../lib/twatch2020s3/utilities.h>
+                #include "Arduino.h"
+                #include <Wire.h>
+                #include <SPI.h>
                 #include <LilyGoLib.h>
                 #include <FT6336U.h>
                 #include <freertos/event_groups.h>
@@ -126,6 +107,7 @@
                 #include <focaltech.h>
                 #include <Ticker.h>
                 #include <TFT_eSPI.h>
+                #include <WiFi.h>
                 #include <config_ext.h>
                 #include <sqlite3.h>
                 extern LilyGoLib watch;
