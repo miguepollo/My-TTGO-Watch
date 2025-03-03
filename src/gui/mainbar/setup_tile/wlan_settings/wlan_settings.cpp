@@ -189,7 +189,7 @@ void wlan_password_tile_setup( uint32_t wifi_password_tile_num ) {
 #ifdef NATIVE_64BIT
     lv_label_set_text_fmt( mac_label, "MAC:" );
 #else
-    lv_label_set_text_fmt( mac_label, "MAC: %s", WiFi.macAddress().c_str());
+    lv_label_set_text_fmt( mac_label, "MAC: Sorry, not available on this platform" );
 #endif
 
     lv_obj_t *apply_btn = wf_add_check_button( wifi_password_tile, apply_wifi_password_event_cb, &wifi_password_style );
